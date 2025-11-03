@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
 use App\Models\Transaksi;
-use App\Models\PoinHistori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,33 +16,22 @@ class PelangganDashboardController extends Controller
 
         // Get customer statistics
         $stats = [
-            'total_poin' => $pelanggan->poin,
             'total_transaksi' => Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)->count(),
             'total_referral' => Pelanggan::where('kode_referal', $pelanggan->kode_referal)->count(),
-            'total_poin_dari_referral' => PoinHistori::where('id_pelanggan', $pelanggan->id_pelanggan)
-                ->where('keterangan', 'like', '%referral%')
-                ->sum('jumlah_poin'),
         ];
 
-        // Get recent transactions
-        $recentTransactions = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+        // Get all transactions with pagination
+        $transactions = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
             ->with('detailTransaksi.produk')
             ->orderBy('tanggal_transaksi', 'desc')
-            ->limit(5)
-            ->get();
+            ->paginate(10);
 
-        // Get point history
-        $pointHistory = PoinHistori::where('id_pelanggan', $pelanggan->id_pelanggan)
-            ->orderBy('tanggal', 'desc')
-            ->limit(10)
-            ->get();
-
-        // Get referrals
+        // Get referrals with pagination
         $referrals = Pelanggan::where('kode_referal', $pelanggan->kode_referal)
             ->select('nama', 'email', 'created_at')
-            ->get();
+            ->paginate(10);
 
-        return view('pelanggan.dashboard', compact('pelanggan', 'stats', 'recentTransactions', 'pointHistory', 'referrals'));
+        return view('pelanggan.dashboard', compact('pelanggan', 'stats', 'transactions', 'referrals'));
     }
 
     public function profile()
@@ -85,6 +73,18 @@ class PelangganDashboardController extends Controller
             ->paginate(10);
 
         return view('pelanggan.transactions', compact('pelanggan', 'transactions'));
+    }
+
+    public function showTransaction($id)
+    {
+        $pelanggan = Auth::guard('pelanggan')->user();
+
+        $transaction = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('id_transaksi', $id)
+            ->with('detailTransaksi.produk.kategori')
+            ->firstOrFail();
+
+        return view('pelanggan.transaction_show', compact('pelanggan', 'transaction'));
     }
 
     public function referrals()
