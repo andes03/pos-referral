@@ -7,6 +7,7 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class PelangganDashboardController extends Controller
 {
@@ -49,10 +50,22 @@ class PelangganDashboardController extends Controller
             'email' => 'required|email|unique:pelanggan,email,' . $pelanggan->id_pelanggan . ',id_pelanggan',
             'no_telp' => 'nullable|string|max:20',
             'alamat' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $data = $request->only(['nama', 'email', 'no_telp', 'alamat']);
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($pelanggan->image && Storage::disk('public')->exists($pelanggan->image)) {
+                Storage::disk('public')->delete($pelanggan->image);
+            }
+
+            // Store new image
+            $imagePath = $request->file('image')->store('pelanggan', 'public');
+            $data['image'] = $imagePath;
+        }
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -60,7 +73,21 @@ class PelangganDashboardController extends Controller
 
         $pelanggan->update($data);
 
-        return redirect()->back()->with('success', 'Profile updated successfully');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true, 
+                'message' => 'Profil berhasil diperbarui!',
+                'data' => [
+                    'nama' => $pelanggan->nama,
+                    'email' => $pelanggan->email,
+                    'no_telp' => $pelanggan->no_telp,
+                    'alamat' => $pelanggan->alamat,
+                    'image' => $pelanggan->image ? asset('storage/' . $pelanggan->image) : null
+                ]
+            ]);
+        }
+
+        return redirect()->route('pelanggan.dashboard')->with('success', 'Profil berhasil diperbarui!');
     }
 
     public function transactions()
@@ -96,5 +123,24 @@ class PelangganDashboardController extends Controller
             ->paginate(10);
 
         return view('pelanggan.referrals', compact('pelanggan', 'referrals'));
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $pelanggan = Auth::guard('pelanggan')->user();
+
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'password.required' => 'Password baru harus diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+        ]);
+
+        $pelanggan->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return redirect()->back()->with('success', 'Password berhasil diubah!');
     }
 }

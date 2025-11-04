@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
-use App\Models\PoinHistori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +17,9 @@ class PelangganController extends Controller
             $query->where('nama', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%')
                   ->orWhere('kode_referal', 'like', '%' . $search . '%');
-        })->paginate(10);
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([
@@ -32,7 +33,16 @@ class PelangganController extends Controller
             ]);
         }
 
-        return view('pegawai.pelanggan.index', compact('pelanggan'));
+        // Kirim data awal ke view untuk rendering pertama
+        return view('pegawai.pelanggan.index', [
+            'initialData' => $pelanggan->items(),
+            'pagination' => [
+                'current_page' => $pelanggan->currentPage(),
+                'last_page' => $pelanggan->lastPage(),
+                'per_page' => $pelanggan->perPage(),
+                'total' => $pelanggan->total(),
+            ]
+        ]);
     }
 
     public function create()
@@ -46,40 +56,31 @@ class PelangganController extends Controller
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:pelanggan,email',
             'password' => 'required|string|min:8',
-            'no_telp' => 'nullable|string|max:20',
+            'no_telp' => ['nullable', 'regex:/^[0-9]{10,15}$/'],
             'alamat' => 'nullable|string',
+            'kode_referal' => 'required|string|max:20|unique:pelanggan,kode_referal',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'kode_referal' => 'nullable|string|max:20|unique:pelanggan,kode_referal',
+        ], [
+            'nama.required' => 'Nama harus diisi',
+            'nama.max' => 'Nama maksimal 100 karakter',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan, silakan gunakan email lain',
+            'password.required' => 'Password harus diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'no_telp.regex' => 'Nomor telepon harus berisi 10-15 digit angka',
+            'kode_referal.required' => 'Kode referal harus diisi',
+            'kode_referal.unique' => 'Kode referal sudah digunakan',
+            'image.image' => 'File harus berupa gambar',
+            'image.mimes' => 'Format gambar harus jpeg, png, jpg, atau gif',
+            'image.max' => 'Ukuran gambar maksimal 2MB',
         ]);
 
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        // Generate referral code if not provided
-        if (!$request->filled('kode_referal')) {
-            $data['kode_referal'] = strtoupper(Str::random(8));
-        }
-
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('pelanggan', 'public');
-        }
-
-        // Check for referral bonus
-        if ($request->filled('referral_code')) {
-            $referrer = Pelanggan::where('kode_referal', $request->referral_code)->first();
-            if ($referrer) {
-                // Add bonus points to referrer
-                $referrer->increment('poin', 50);
-
-                // Record in point history
-                PoinHistori::create([
-                    'id_pelanggan' => $referrer->id_pelanggan,
-                    'jenis' => 'tambah',
-                    'jumlah_poin' => 50,
-                    'keterangan' => 'Bonus referral untuk pendaftaran pelanggan baru',
-                    'tanggal' => now(),
-                ]);
-            }
         }
 
         Pelanggan::create($data);
@@ -102,11 +103,24 @@ class PelangganController extends Controller
         $request->validate([
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:pelanggan,email,' . $pelanggan->id_pelanggan . ',id_pelanggan',
-            'no_telp' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:8',
+            'no_telp' => ['nullable', 'regex:/^[0-9]{10,15}$/'],
             'alamat' => 'nullable|string',
-            'poin' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'kode_referal' => 'required|string|max:20|unique:pelanggan,kode_referal,' . $pelanggan->id_pelanggan . ',id_pelanggan',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'nama.required' => 'Nama harus diisi',
+            'nama.max' => 'Nama maksimal 100 karakter',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan, silakan gunakan email lain',
+            'password.min' => 'Password minimal 8 karakter',
+            'no_telp.regex' => 'Nomor telepon harus berisi 10-15 digit angka',
+            'kode_referal.required' => 'Kode referal harus diisi',
+            'kode_referal.unique' => 'Kode referal sudah digunakan',
+            'image.image' => 'File harus berupa gambar',
+            'image.mimes' => 'Format gambar harus jpeg, png, jpg, atau gif',
+            'image.max' => 'Ukuran gambar maksimal 2MB',
         ]);
 
         $data = $request->except('password');

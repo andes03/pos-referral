@@ -220,7 +220,7 @@ function renderTable(transaksi) {
     transaksi.forEach(item => {
         // Generate kode transaksi from date and ID
         const date = new Date(item.tanggal_transaksi);
-        const kodeTransaksi = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(-2)}-tra${item.id_transaksi.toString().padStart(3, '0')}`;
+        const kodeTransaksi = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear().toString().slice(-2)}-TRA${item.id_transaksi.toString().padStart(3, '0')}`;
         
         // Format metode pembayaran
         const metodeBadge = item.metode_pembayaran === 'cash' 
@@ -394,7 +394,7 @@ function viewTransaksi(id) {
         
         // Generate kode transaksi
         const date = new Date(transaksi.tanggal_transaksi);
-        const kodeTransaksi = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(-2)}-tra${transaksi.id_transaksi.toString().padStart(3, '0')}`;
+        const kodeTransaksi = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear().toString().slice(-2)}-TRA${transaksi.id_transaksi.toString().padStart(3, '0')}`;
         
         document.getElementById('viewKode').textContent = kodeTransaksi;
         document.getElementById('viewTanggal').textContent = new Date(transaksi.tanggal_transaksi).toLocaleDateString('id-ID', { 
@@ -469,83 +469,136 @@ function printNotaFromModal() {
     const metode = document.getElementById('viewMetode').textContent;
     const pegawai = document.getElementById('viewPegawai').textContent;
     const pelanggan = document.getElementById('viewPelanggan').textContent;
-    const email = document.getElementById('viewEmail').textContent;
-    const produkListHTML = document.getElementById('produkList').innerHTML;
     const total = document.getElementById('viewTotal').textContent;
 
-    const printWindow = window.open('', '', 'height=600,width=800');
+    // Get product list
+    const produkItems = document.getElementById('produkList').querySelectorAll('.flex.items-center');
+    let produkHTML = '';
+
+    produkItems.forEach(item => {
+        const nama = item.querySelector('.text-sm.font-medium')?.textContent || '';
+        const detail = item.querySelector('.text-xs')?.textContent || '';
+
+        const match = detail.match(/(\d+) x Rp ([\d,.]+) = .*Rp ([\d,.]+)/);
+        if (match) {
+            const qty = match[1];
+            const harga = match[2];
+            const subtotal = match[3];
+            produkHTML += `
+                <tr>
+                    <td colspan="3" style="padding: 4px 0;">
+                        <div style="font-weight: bold;">${nama}</div>
+                        <div style="color: #666; display: flex; justify-content: space-between; font-size: 10px;">
+                            <span>${qty} x Rp ${harga}</span>
+                            <span style="font-weight: bold;">Rp ${subtotal}</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+
+    const printWindow = window.open('', '', 'height=600,width=400');
     printWindow.document.write('<html><head><title>Nota Transaksi</title>');
     printWindow.document.write(`
         <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .container { max-width: 600px; margin: 0 auto; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-            .text-center { text-align: center; }
-            .text-right { text-align: right; }
-            .border-b-2 { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-            .border-t-2 { border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; }
-            .font-bold { font-weight: bold; }
-            .text-sm { font-size: 14px; }
-            .text-xs { font-size: 12px; }
-            .mb-4 { margin-bottom: 20px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             @media print {
-                body { margin: 0; }
-                @page { margin: 1cm; }
+                @page {
+                    size: 80mm auto;
+                    margin: 0;
+                }
             }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Courier New', monospace;
+                width: 80mm;
+                margin: 0 auto;
+                padding: 5mm;
+                font-size: 11px;
+                line-height: 1.4;
+            }
+            .text-center { text-align: center; }
+            .font-bold { font-weight: bold; }
+            .border-dashed {
+                border-style: dashed !important;
+                border-color: #999 !important;
+            }
+            .border-b { border-bottom: 1px dashed #999; padding-bottom: 8px; margin-bottom: 8px; }
+            .border-t { border-top: 1px dashed #999; padding-top: 8px; margin-top: 8px; }
+            table { width: 100%; border-collapse: collapse; }
+            .flex { display: flex; justify-content: space-between; margin: 2px 0; }
+            .text-xs { font-size: 10px; }
+            .text-sm { font-size: 11px; }
+            .text-xl { font-size: 16px; }
+            h1 { font-size: 18px; margin-bottom: 4px; }
         </style>
     `);
     printWindow.document.write('</head><body>');
     printWindow.document.write(`
-        <div class="container">
-            <div class="text-center border-b-2">
-                <h1 style="margin: 0;">TOKO KITA</h1>
-                <p class="text-sm" style="margin: 5px 0;">Jl. Contoh No. 123, Kota</p>
-                <p class="text-sm" style="margin: 5px 0;">Telp: (0561) 123-4567</p>
-            </div>
+        <div class="text-center border-b pb-3 mb-3" style="padding-bottom: 12px; margin-bottom: 12px;">
+            <h1 class="font-bold">SEBELAS COFFEE</h1>
+            <div class="text-xs">Jl. Nologaten, Nologaten, Caturtunggal,</div>
+            <div class="text-xs">Kec. Depok, Kabupaten Sleman,</div>
+            <div class="text-xs">Daerah Istimewa Yogyakarta 55281</div>
+        </div>
 
-            <div class="grid mb-4">
-                <div>
-                    <p class="text-sm"><strong>No. Transaksi:</strong> ${kode}</p>
-                    <p class="text-sm"><strong>Tanggal:</strong> ${tanggal}</p>
-                </div>
-                <div>
-                    <p class="text-sm"><strong>Pelanggan:</strong> ${pelanggan}</p>
-                    <p class="text-sm"><strong>Kasir:</strong> ${pegawai}</p>
-                </div>
+        <div class="text-xs" style="margin-bottom: 12px;">
+            <div class="flex">
+                <span>No. Transaksi</span>
+                <span class="font-bold">${kode}</span>
             </div>
+            <div class="flex">
+                <span>Tanggal</span>
+                <span>${tanggal}</span>
+            </div>
+            <div class="flex">
+                <span>Kasir</span>
+                <span>${pegawai}</span>
+            </div>
+            <div class="flex">
+                <span>Pelanggan</span>
+                <span>${pelanggan}</span>
+            </div>
+        </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th class="text-center" style="width: 60px;">Qty</th>
-                        <th class="text-right" style="width: 120px;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${convertProdukListToTable(produkListHTML)}
-                </tbody>
+        <div class="border-t" style="padding-top: 8px; margin-bottom: 8px;">
+            <table class="text-xs">
+                ${produkHTML}
             </table>
+        </div>
 
-            <div class="border-t-2">
-                <p class="text-right font-bold" style="font-size: 18px; margin: 10px 0;">
-                    TOTAL: Rp ${total}
-                </p>
-                <p class="text-sm"><strong>Metode Pembayaran:</strong> ${metode}</p>
+        <div class="border-t text-xs" style="padding-top: 8px; margin-bottom: 12px;">
+            <div class="flex">
+                <span>Subtotal</span>
+                <span>Rp ${total}</span>
             </div>
+            <div class="flex font-bold text-sm" style="margin-top: 4px; font-size: 12px;">
+                <span>TOTAL</span>
+                <span>Rp ${total}</span>
+            </div>
+            <div class="flex">
+                <span>Pembayaran</span>
+                <span class="font-bold">${metode}</span>
+            </div>
+        </div>
 
-            <div class="text-center text-xs" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px;">
-                <p style="margin: 5px 0;">Terima kasih atas kunjungan Anda!</p>
-                <p style="margin: 5px 0;">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>
-                <p style="margin: 5px 0;">Simpan nota ini sebagai bukti pembayaran yang sah</p>
+        <div class="text-center text-xs border-t" style="padding-top: 12px;">
+            <div class="font-bold" style="margin-bottom: 8px;">Terima kasih atas kunjungan Anda!</div>
+            <div>Barang yang sudah dibeli</div>
+            <div>tidak dapat ditukar/dikembalikan</div>
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ccc;">
+                <div>Simpan nota ini sebagai bukti</div>
+                <div>pembayaran yang sah</div>
             </div>
         </div>
     `);
     printWindow.document.write('</body></html>');
     printWindow.document.close();
-    
+
     setTimeout(() => {
         printWindow.print();
         printWindow.close();

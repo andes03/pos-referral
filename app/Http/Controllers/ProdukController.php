@@ -13,6 +13,7 @@ class ProdukController extends Controller
     {
         $search = $request->get('search');
         $kategori = $request->get('kategori');
+        
         $produk = Produk::with('kategori')
             ->when($kategori, function ($query) use ($kategori) {
                 $query->where('id_kategori', $kategori);
@@ -38,13 +39,16 @@ class ProdukController extends Controller
             ]);
         }
 
-        return view('pegawai.produk.index', compact('produk'));
-    }
-
-    public function create()
-    {
-        $kategori = Kategori::all();
-        return view('pegawai.produk.create', compact('kategori'));
+        // Kirim data awal ke view
+        return view('pegawai.produk.index', [
+            'initialData' => $produk->items(),
+            'pagination' => [
+                'current_page' => $produk->currentPage(),
+                'last_page' => $produk->lastPage(),
+                'per_page' => $produk->perPage(),
+                'total' => $produk->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -58,6 +62,14 @@ class ProdukController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'nama.unique' => 'Nama produk sudah ada.',
+            'id_kategori.required' => 'Kategori harus dipilih.',
+            'id_kategori.exists' => 'Kategori tidak valid.',
+            'harga.required' => 'Harga harus diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga tidak boleh kurang dari 0.',
+            'stok.required' => 'Stok harus diisi.',
+            'stok.integer' => 'Stok harus berupa angka.',
+            'stok.min' => 'Stok tidak boleh kurang dari 0.',
         ]);
 
         $data = $request->all();
@@ -68,18 +80,12 @@ class ProdukController extends Controller
 
         Produk::create($data);
 
-        return response()->json(['success' => true, 'message' => 'Produk created successfully']);
+        return response()->json(['success' => true, 'message' => 'Produk berhasil ditambahkan']);
     }
 
     public function show(Produk $produk)
     {
         return response()->json($produk->load('kategori'));
-    }
-
-    public function edit(Produk $produk)
-    {
-        $kategori = Kategori::all();
-        return view('pegawai.produk.edit', compact('produk', 'kategori'));
     }
 
     public function update(Request $request, Produk $produk)
@@ -93,6 +99,14 @@ class ProdukController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'nama.unique' => 'Nama produk sudah ada.',
+            'id_kategori.required' => 'Kategori harus dipilih.',
+            'id_kategori.exists' => 'Kategori tidak valid.',
+            'harga.required' => 'Harga harus diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga tidak boleh kurang dari 0.',
+            'stok.required' => 'Stok harus diisi.',
+            'stok.integer' => 'Stok harus berupa angka.',
+            'stok.min' => 'Stok tidak boleh kurang dari 0.',
         ]);
 
         $data = $request->all();
@@ -106,7 +120,7 @@ class ProdukController extends Controller
 
         $produk->update($data);
 
-        return response()->json(['success' => true, 'message' => 'Produk updated successfully']);
+        return response()->json(['success' => true, 'message' => 'Produk berhasil diupdate']);
     }
 
     public function destroy(Produk $produk)
@@ -117,6 +131,6 @@ class ProdukController extends Controller
 
         $produk->delete();
 
-        return response()->json(['success' => true, 'message' => 'Produk deleted successfully']);
+        return response()->json(['success' => true, 'message' => 'Produk berhasil dihapus']);
     }
 }

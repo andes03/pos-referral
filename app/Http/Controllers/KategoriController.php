@@ -27,7 +27,16 @@ class KategoriController extends Controller
             ]);
         }
 
-        return view('pegawai.kategori.index', compact('kategori'));
+        // Kirim data awal ke view
+        return view('pegawai.kategori.index', [
+            'initialData' => $kategori->items(),
+            'pagination' => [
+                'current_page' => $kategori->currentPage(),
+                'last_page' => $kategori->lastPage(),
+                'per_page' => $kategori->perPage(),
+                'total' => $kategori->total(),
+            ]
+        ]);
     }
 
     public function create()

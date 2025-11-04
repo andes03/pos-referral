@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule; // Pastikan ini ada
+use Illuminate\Validation\Rule;
 
 class PegawaiController extends Controller
 {
@@ -17,7 +16,7 @@ class PegawaiController extends Controller
         $pegawai = Pegawai::when($search, function ($query) use ($search) {
             $query->where('nama', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%');
-        })->paginate(10); // Anda mungkin ingin mengubah paginate(1) ini ke nilai lebih tinggi, misal 10
+        })->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([
@@ -31,12 +30,16 @@ class PegawaiController extends Controller
             ]);
         }
 
-        return view('pegawai.pegawai.index', compact('pegawai'));
-    }
-
-    public function create()
-    {
-        return view('pegawai.pegawai.create');
+        // Kirim data awal ke view
+        return view('pegawai.pegawai.index', [
+            'initialData' => $pegawai->items(),
+            'pagination' => [
+                'current_page' => $pegawai->currentPage(),
+                'last_page' => $pegawai->lastPage(),
+                'per_page' => $pegawai->perPage(),
+                'total' => $pegawai->total(),
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -46,25 +49,24 @@ class PegawaiController extends Controller
             'email' => [
                 'required',
                 'email',
-                'unique:pegawai,email', // Cek di tabel pegawai
-                'unique:pelanggan,email' // Cek di tabel pelanggan
+                'unique:pegawai,email',
+                'unique:pelanggan,email'
             ],
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,user',
             'no_telp' => [
                 'nullable',
                 'string',
-                'regex:/^\d{10,15}$/', // Regex untuk 10-15 digit angka
-                'unique:pegawai,no_telp' // Unik di tabel pegawai
+                'regex:/^\d{10,15}$/',
+                'unique:pegawai,no_telp'
             ],
             'alamat' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            // Pesan custom
-            'email.unique' => 'Email sudah di gunakan di sistem.',
+            'email.unique' => 'Email sudah digunakan di sistem.',
             'no_telp.regex' => 'No. Telp harus terdiri dari 10-15 digit angka.',
             'no_telp.unique' => 'No. Telp sudah terdaftar.',
-            'password.min' => 'Password minimal harus 8 karakter.' // INI TAMBAHANNYA
+            'password.min' => 'Password minimal harus 8 karakter.'
         ]);
 
         $data = $request->all();
@@ -76,17 +78,12 @@ class PegawaiController extends Controller
 
         Pegawai::create($data);
 
-        return response()->json(['success' => true, 'message' => 'Pegawai created successfully']);
+        return response()->json(['success' => true, 'message' => 'Pegawai berhasil ditambahkan']);
     }
 
     public function show(Pegawai $pegawai)
     {
         return response()->json($pegawai);
-    }
-
-    public function edit(Pegawai $pegawai)
-    {
-        return view('pegawai.pegawai.edit', compact('pegawai'));
     }
 
     public function update(Request $request, Pegawai $pegawai)
@@ -96,25 +93,24 @@ class PegawaiController extends Controller
             'email' => [
                 'required',
                 'email',
-                Rule::unique('pegawai', 'email')->ignore($pegawai->id_pegawai, 'id_pegawai'), // Cek di pegawai (abaikan diri sendiri)
-                'unique:pelanggan,email' // Cek di tabel pelanggan
+                Rule::unique('pegawai', 'email')->ignore($pegawai->id_pegawai, 'id_pegawai'),
+                'unique:pelanggan,email'
             ],
-            'password' => 'nullable|string|min:8', // INI TAMBAHAN ATURAN
+            'password' => 'nullable|string|min:8',
             'role' => 'required|in:admin,user',
             'no_telp' => [
                 'nullable',
                 'string',
-                'regex:/^\d{10,15}$/', // Regex untuk 10-15 digit angka
-                Rule::unique('pegawai', 'no_telp')->ignore($pegawai->id_pegawai, 'id_pegawai') // Unik di pegawai (abaikan diri sendiri)
+                'regex:/^\d{10,15}$/',
+                Rule::unique('pegawai', 'no_telp')->ignore($pegawai->id_pegawai, 'id_pegawai')
             ],
             'alamat' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            // Pesan custom
-            'email.unique' => 'Email sudah di gunakan di sistem.',
+            'email.unique' => 'Email sudah digunakan di sistem.',
             'no_telp.regex' => 'No. Telp harus terdiri dari 10-15 digit angka.',
             'no_telp.unique' => 'No. Telp sudah terdaftar.',
-            'password.min' => 'Password minimal harus 8 karakter.' // INI TAMBAHAN PESAN
+            'password.min' => 'Password minimal harus 8 karakter.'
         ]);
 
         $data = $request->except('password');
@@ -132,7 +128,7 @@ class PegawaiController extends Controller
 
         $pegawai->update($data);
 
-        return response()->json(['success' => true, 'message' => 'Pegawai updated successfully']);
+        return response()->json(['success' => true, 'message' => 'Pegawai berhasil diupdate']);
     }
 
     public function destroy(Pegawai $pegawai)
@@ -143,6 +139,6 @@ class PegawaiController extends Controller
 
         $pegawai->delete();
 
-        return response()->json(['success' => true, 'message' => 'Pegawai deleted successfully']);
+        return response()->json(['success' => true, 'message' => 'Pegawai berhasil dihapus']);
     }
 }

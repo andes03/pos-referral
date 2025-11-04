@@ -5,63 +5,75 @@
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Create your account
+                Buat Akun Anda
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Join our loyalty program and start earning points
+                Bergabunglah dengan program loyalitas kami dan mulai mengumpulkan poin
             </p>
         </div>
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">
             @csrf
             <div class="space-y-4">
                 <div>
-                    <label for="nama" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                     <input id="nama" name="nama" type="text" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Enter your full name" value="{{ old('nama') }}">
+                           placeholder="Masukkan nama lengkap Anda" value="{{ old('nama') }}">
+                    @error('nama')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Alamat Email</label>
                     <input id="email" name="email" name="email" type="email" autocomplete="email" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Enter your email" value="{{ old('email') }}">
+                           placeholder="Masukkan email Anda" value="{{ old('email') }}">
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="no_telp" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                    <input id="no_telp" name="no_telp" type="text"
+                    <label for="no_telp" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+                    <input id="no_telp" name="no_telp" type="text" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Enter your phone number" value="{{ old('no_telp') }}">
+                           placeholder="Masukkan nomor telepon Anda" value="{{ old('no_telp') }}">
+                    @error('no_telp')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="alamat" class="block text-sm font-medium text-gray-700">Address</label>
-                    <textarea id="alamat" name="alamat" rows="3"
+                    <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
+                    <textarea id="alamat" name="alamat" rows="3" required
                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              placeholder="Enter your address">{{ old('alamat') }}</textarea>
+                              placeholder="Masukkan alamat Anda">{{ old('alamat') }}</textarea>
+                    @error('alamat')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div>
-                    <label for="referral_code" class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
-                    <input id="referral_code" name="referral_code" type="text"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Enter referral code if you have one" value="{{ old('referral_code') }}">
-                    <p class="mt-1 text-sm text-gray-500">Enter a referral code to get bonus points for both you and the referrer!</p>
-                </div>
+
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Kata Sandi</label>
                     <input id="password" name="password" type="password" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Create a password">
+                           placeholder="Buat kata sandi">
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Kata Sandi</label>
                     <input id="password_confirmation" name="password_confirmation" type="password" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Confirm your password">
+                           placeholder="Konfirmasi kata sandi Anda">
+                    @error('password_confirmation')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -70,7 +82,7 @@
                     <div class="flex">
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-red-800">
-                                There were some errors with your submission:
+                                Ada beberapa kesalahan dalam pengiriman Anda:
                             </h3>
                             <div class="mt-2 text-sm text-red-700">
                                 <ul role="list" class="list-disc pl-5 space-y-1">
@@ -92,15 +104,15 @@
                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                         </svg>
                     </span>
-                    Create Account
+                    Buat Akun
                 </button>
             </div>
 
             <div class="text-center">
                 <p class="text-sm text-gray-600">
-                    Already have an account?
+                    Sudah memiliki akun?
                     <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                        Sign in here
+                        Masuk di sini
                     </a>
                 </p>
             </div>

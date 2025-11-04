@@ -33,7 +33,6 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No. Telp</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Poin</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kode Referal</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -43,7 +42,7 @@
             </table>
         </div>
         <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            </div>
+        </div>
     </div>
 </div>
 
@@ -110,26 +109,15 @@
                                    class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600">
                         </div>
                         <div>
-                            <label for="poin" class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+                            <label for="kode_referal" class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                 </svg>
-                                Poin <span class="text-red-500">*</span>
+                                Kode Referal <span class="text-red-500">*</span>
                             </label>
-                            <input type="number" id="poin" name="poin" min="0" required
+                            <input type="text" id="kode_referal" name="kode_referal" required
                                    class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600">
                         </div>
-                    </div>
-
-                    <div>
-                        <label for="kode_referal" class="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            Kode Referal <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="kode_referal" name="kode_referal" required
-                               class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600">
                     </div>
 
                     <div>
@@ -178,6 +166,7 @@
     </div>
 </div>
 
+<!-- Delete Modal -->
 <div id="deleteModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative w-full max-w-sm bg-white rounded-lg shadow-xl p-5">
@@ -205,6 +194,7 @@
     </div>
 </div>
 
+<!-- View Modal -->
 <div id="viewModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative w-full max-w-lg bg-white rounded-lg shadow-xl">
@@ -220,11 +210,10 @@
             <div class="p-5">
                 <div class="flex items-center mb-6">
                     <div id="viewImage" class="flex-shrink-0 h-20 w-20 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-2xl">
-                        </div>
+                    </div>
                     <div class="ml-4">
                         <h4 id="viewNama" class="text-xl font-semibold text-gray-900"></h4>
                         <p id="viewEmail" class="text-gray-600"></p>
-                        <span id="viewPoin" class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-700"></span>
                     </div>
                 </div>
 
@@ -258,18 +247,36 @@
 let currentPage = 1;
 let deleteId = null;
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadPelanggan();
+// Data awal dari server
+const initialData = @json($initialData ?? []);
+const initialPagination = @json($pagination ?? null);
 
-    // Search on input change
+document.addEventListener('DOMContentLoaded', function() {
+    // Render data awal langsung tanpa AJAX call
+    if (initialData.length > 0) {
+        renderTable(initialData);
+        if (initialPagination) {
+            renderPagination(initialPagination);
+            currentPage = initialPagination.current_page;
+        }
+    } else {
+        // Jika memang tidak ada data, tampilkan pesan kosong
+        renderTable([]);
+    }
+
+    // Search on input change with debounce
+    let searchTimeout;
     document.getElementById('searchInput').addEventListener('input', function() {
-        searchData();
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            searchData();
+        }, 300);
     });
 
     // Form submission
     document.getElementById('pelangganForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        clearValidationErrors(); // Bersihkan error sebelum submit
+        clearValidationErrors();
         savePelanggan();
     });
 });
@@ -277,6 +284,19 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadPelanggan(page = 1) {
     currentPage = page;
     const search = document.getElementById('searchInput').value;
+
+    // Tampilkan loading indicator
+    const tbody = document.getElementById('pelangganTableBody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" class="px-6 py-8 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
+                    <p class="text-gray-500 text-sm">Memuat data...</p>
+                </div>
+            </td>
+        </tr>
+    `;
 
     fetch(`{{ route('pegawai.pelanggan.index') }}?page=${page}&search=${encodeURIComponent(search)}`, {
         headers: {
@@ -289,18 +309,27 @@ function loadPelanggan(page = 1) {
         renderTable(data.data);
         renderPagination(data.pagination);
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-8 text-center">
+                    <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
+                </td>
+            </tr>
+        `;
+    });
 }
 
 function renderTable(pelanggan) {
     const tbody = document.getElementById('pelangganTableBody');
     tbody.innerHTML = '';
+    
     if (pelanggan.length === 0) {
         if (document.getElementById('searchInput').value.trim() !== '') {
-            // Show search no results message
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
+                    <td colspan="5" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center">
                             <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -312,10 +341,9 @@ function renderTable(pelanggan) {
                 </tr>
             `;
         } else {
-            // Show no data message
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
+                    <td colspan="5" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center">
                             <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
@@ -348,11 +376,6 @@ function renderTable(pelanggan) {
                 </td>
                 <td class="px-6 py-3 text-sm text-gray-600">${item.email}</td>
                 <td class="px-6 py-3 text-sm text-gray-600">${item.no_telp || '-'}</td>
-                <td class="px-6 py-3">
-                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-700">
-                        ${item.poin}
-                    </span>
-                </td>
                 <td class="px-6 py-3 text-sm text-gray-600">${item.kode_referal}</td>
                 <td class="px-6 py-3">
                     <div class="flex items-center justify-end gap-2">
@@ -391,7 +414,7 @@ function renderPagination(pagination) {
     html += `<p class="text-sm text-gray-600">Menampilkan ${((pagination.current_page - 1) * pagination.per_page) + 1} - ${Math.min(pagination.current_page * pagination.per_page, pagination.total)} dari ${pagination.total} data</p>`;
     html += '<div class="flex gap-1">';
 
-    // Previous button - always visible
+    // Previous button
     if (pagination.current_page > 1) {
         html += `
             <button onclick="loadPelanggan(${pagination.current_page - 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Previous">
@@ -419,7 +442,7 @@ function renderPagination(pagination) {
         }
     }
 
-    // Next button - always visible
+    // Next button
     if (pagination.current_page < pagination.last_page) {
         html += `
             <button onclick="loadPelanggan(${pagination.current_page + 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Next">
@@ -451,14 +474,20 @@ function openCreateModal() {
     document.getElementById('pelangganForm').reset();
     document.getElementById('pelangganId').value = '';
     document.getElementById('password').required = true;
-    // Generate random referral code
     document.getElementById('kode_referal').value = generateReferralCode();
-    document.getElementById('poin').value = 0;
+    document.getElementById('imagePreview').classList.add('hidden');
+    clearValidationErrors();
     document.getElementById('pelangganModal').classList.remove('hidden');
 }
 
 function generateReferralCode() {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+        code += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    code += Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return code;
 }
 
 function editPelanggan(id) {
@@ -471,9 +500,18 @@ function editPelanggan(id) {
         document.getElementById('email').value = data.email;
         document.getElementById('no_telp').value = data.no_telp || '';
         document.getElementById('alamat').value = data.alamat || '';
-        document.getElementById('poin').value = data.poin;
         document.getElementById('kode_referal').value = data.kode_referal;
         document.getElementById('password').required = false;
+        
+        // Show existing image preview
+        if (data.image) {
+            document.getElementById('previewImg').src = '/storage/' + data.image;
+            document.getElementById('imagePreview').classList.remove('hidden');
+        } else {
+            document.getElementById('imagePreview').classList.add('hidden');
+        }
+        
+        clearValidationErrors();
         document.getElementById('pelangganModal').classList.remove('hidden');
     })
     .catch(error => console.error('Error:', error));
@@ -500,10 +538,10 @@ function savePelanggan() {
         }
     })
     .then(async response => {
-        if (response.status === 422) { // Tangkap error validasi
+        if (response.status === 422) {
             const data = await response.json();
             displayValidationErrors(data.errors);
-            throw new Error('Validation failed'); // Hentikan promise chain
+            throw new Error('Validation failed');
         }
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -570,24 +608,20 @@ function closeViewModal() {
 }
 
 function viewPelanggan(id) {
-    closeModal();
-    closeDeleteModal();
     fetch(`{{ route('pegawai.pelanggan.index') }}/${id}`)
     .then(response => response.json())
     .then(data => {
         document.getElementById('viewNama').textContent = data.nama;
         document.getElementById('viewEmail').textContent = data.email;
-        document.getElementById('viewPoin').textContent = data.poin;
         document.getElementById('viewNoTelp').textContent = data.no_telp || '-';
         document.getElementById('viewKodeReferal').textContent = data.kode_referal;
         document.getElementById('viewAlamat').textContent = data.alamat || '-';
 
-        // Handle image display
         const viewImageDiv = document.getElementById('viewImage');
         if (data.image) {
-            viewImageDiv.innerHTML = `<img src="/storage/${data.image}" alt="${data.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-20 w-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-2xl\\'>${data.nama.charAt(0).toUpperCase()}</div>'">`;
+            viewImageDiv.innerHTML = `<img src="/storage/${data.image}" alt="${data.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='${data.nama.charAt(0).toUpperCase()}'">`;
         } else {
-            viewImageDiv.innerHTML = `<div class="h-20 w-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">${data.nama.charAt(0).toUpperCase()}</div>`;
+            viewImageDiv.innerHTML = data.nama.charAt(0).toUpperCase();
         }
 
         document.getElementById('viewModal').classList.remove('hidden');
@@ -609,31 +643,24 @@ function previewImage(event) {
 
 function clearValidationErrors() {
     const form = document.getElementById('pelangganForm');
-    
-    // Hapus style error dari semua input
     form.querySelectorAll('.border-red-500').forEach(el => {
         el.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
     });
-    
-    // Hapus semua elemen pesan error
     form.querySelectorAll('p.text-red-600').forEach(el => {
         el.remove();
     });
 }
 
 function displayValidationErrors(errors) {
+    clearValidationErrors();
     for (const field in errors) {
         const input = document.getElementById(field);
         if (input) {
-            // Tambahkan style error ke input
             input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-            
-            // Buat dan tampilkan elemen pesan error
             const errorEl = document.createElement('p');
             errorEl.className = 'text-xs text-red-600 mt-1';
-            errorEl.textContent = errors[field][0]; // Ambil pesan error pertama
+            errorEl.textContent = errors[field][0];
             
-            // Sisipkan setelah input atau parent-nya jika lebih kompleks (spt foto)
             if(field === 'image') {
                 input.closest('.flex-1').appendChild(errorEl);
             } else {
@@ -652,8 +679,10 @@ function showAlert(message, type) {
     const icon = type === 'success' 
         ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
         : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    
     alertDiv.innerHTML = icon + '<span class="font-medium">' + message + '</span>';
     document.body.appendChild(alertDiv);
+    
     setTimeout(() => {
         alertDiv.style.opacity = '0';
         alertDiv.style.transform = 'translateX(100%)';

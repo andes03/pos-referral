@@ -17,6 +17,7 @@ class Transaksi extends Model
         'id_pegawai',
         'total',
         'metode_pembayaran',
+        'status_pembayaran',
         'tanggal_transaksi'
     ];
 
@@ -28,10 +29,10 @@ class Transaksi extends Model
     // Accessor untuk kode transaksi
     public function getKodeTransaksiAttribute()
     {
-        // Format: dd/mm/yy-tra001
-        $tanggal = $this->tanggal_transaksi->format('d/m/y');
+        // Format: ddmmyy-TRA001
+        $tanggal = $this->tanggal_transaksi->format('dmY');
         $idFormatted = str_pad($this->id_transaksi, 3, '0', STR_PAD_LEFT);
-        return "{$tanggal}-tra{$idFormatted}";
+        return "{$tanggal}-TRA{$idFormatted}";
     }
 
     // Relationships
@@ -49,4 +50,6 @@ class Transaksi extends Model
     {
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id_transaksi');
     }
+
+
 }

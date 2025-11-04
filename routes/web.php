@@ -9,7 +9,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\PoinHistoriController;
+
 
 // Landing page
 Route::get('/', function () {
@@ -38,7 +38,7 @@ Route::middleware(['auth.pegawai'])->prefix('pegawai')->name('pegawai.')->group(
     Route::resource('kategori', KategoriController::class);
     Route::resource('produk', ProdukController::class);
     Route::resource('transaksi', TransaksiController::class);
-    Route::resource('poin-histori', PoinHistoriController::class, ['parameters' => ['poin-histori' => 'poinHistori']]);
+
 });
 
 // Pelanggan routes (protected by pelanggan middleware)
@@ -46,6 +46,8 @@ Route::middleware(['auth.pelanggan'])->prefix('pelanggan')->name('pelanggan.')->
     Route::get('/dashboard', [PelangganDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [PelangganDashboardController::class, 'profile'])->name('profile');
     Route::put('/profile', [PelangganDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/password', [PelangganDashboardController::class, 'updatePassword'])->name('password.update');
     Route::get('/transactions', [PelangganDashboardController::class, 'transactions'])->name('transactions');
+    Route::get('/transaction/{id}', [PelangganDashboardController::class, 'showTransaction'])->name('transaction.show');
     Route::get('/referrals', [PelangganDashboardController::class, 'referrals'])->name('referrals');
 });

@@ -42,7 +42,7 @@
             </table>
         </div>
         <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            </div>
+        </div>
     </div>
 </div>
 
@@ -118,15 +118,12 @@
                             </svg>
                             Foto Produk
                         </label>
-                        <div class="flex items-center gap-3">
-                            <div id="imagePreview" class="flex-shrink-0 hidden">
-                                <img id="previewImg" src="" alt="Preview" class="h-16 w-16 rounded-lg object-cover border-2 border-gray-200">
-                            </div>
-                            <div class="flex-1">
-                                <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)"
-                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-                            </div>
-                        </div>
+                        <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)"
+                               class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                    </div>
+
+                    <div id="imagePreview" class="hidden">
+                        <img id="previewImg" src="" alt="Preview" class="h-24 w-24 rounded-lg object-cover border-2 border-gray-200">
                     </div>
 
                     <div>
@@ -156,6 +153,7 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative w-full max-w-sm bg-white rounded-lg shadow-xl p-5">
@@ -183,11 +181,12 @@
     </div>
 </div>
 
+<!-- View Detail Modal -->
 <div id="viewModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative w-full max-w-lg bg-white rounded-lg shadow-xl">
             <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Detail Produk</h3>
+                <h3 class="text-base font-semibold text-gray-900">Detail Produk</h3>
                 <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -198,24 +197,20 @@
             <div class="p-5">
                 <div class="flex items-center mb-6">
                     <div id="viewImage" class="flex-shrink-0 h-20 w-20 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-2xl">
-                        </div>
+                    </div>
                     <div class="ml-4">
                         <h4 id="viewNama" class="text-xl font-semibold text-gray-900"></h4>
-                        <p id="viewKategori" class="text-gray-600"></p>
-                        <span id="viewHarga" class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-700"></span>
+                        <p id="viewKategori" class="text-gray-600 text-sm"></p>
+                        <span id="viewHarga" class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-700 mt-1"></span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Stok</label>
                         <p id="viewStok" class="text-sm text-gray-900">-</p>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Kategori</label>
-                        <p id="viewKategoriDetail" class="text-sm text-gray-900">-</p>
-                    </div>
-                    <div class="md:col-span-2">
                         <label class="block text-xs font-medium text-gray-700 mb-1">Deskripsi</label>
                         <p id="viewDeskripsi" class="text-sm text-gray-900">-</p>
                     </div>
@@ -224,7 +219,7 @@
 
             <div class="flex justify-end px-5 py-3 border-t border-gray-200">
                 <button type="button" onclick="closeViewModal()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                        class="px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
                     Tutup
                 </button>
             </div>
@@ -235,26 +230,63 @@
 <script>
 let currentPage = 1;
 let deleteId = null;
+let searchTimeout;
+let isSearching = false;
+
+// Data awal dari server
+const initialData = @json($initialData ?? []);
+const initialPagination = @json($pagination ?? null);
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadProduk();
+    // Render data awal langsung tanpa AJAX call
+    if (initialData.length > 0) {
+        renderTable(initialData);
+        if (initialPagination) {
+            renderPagination(initialPagination);
+            currentPage = initialPagination.current_page;
+        }
+    } else {
+        renderTable([]);
+    }
 
-    // Search on input change
-    document.getElementById('searchInput').addEventListener('input', function() {
-        searchData();
+    // Search on input change with debounce (600ms for better UX)
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        // Show searching indicator
+        showSearchingIndicator();
+        
+        searchTimeout = setTimeout(function() {
+            searchData();
+        }, 600);
     });
 
     // Form submission
     document.getElementById('produkForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        clearValidationErrors(); // Bersihkan error sebelum submit
         saveProduk();
     });
 });
 
 function loadProduk(page = 1) {
+    if (isSearching) return; // Prevent multiple simultaneous requests
+    
+    isSearching = true;
     currentPage = page;
     const search = document.getElementById('searchInput').value;
+
+    const tbody = document.getElementById('produkTableBody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" class="px-6 py-8 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
+                    <p class="text-gray-500 text-sm">Memuat data...</p>
+                </div>
+            </td>
+        </tr>
+    `;
 
     fetch(`{{ route('pegawai.produk.index') }}?page=${page}&search=${encodeURIComponent(search)}`, {
         headers: {
@@ -266,16 +298,29 @@ function loadProduk(page = 1) {
     .then(data => {
         renderTable(data.data);
         renderPagination(data.pagination);
+        isSearching = false;
+        hideSearchingIndicator();
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-8 text-center">
+                    <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
+                </td>
+            </tr>
+        `;
+        isSearching = false;
+        hideSearchingIndicator();
+    });
 }
 
 function renderTable(produk) {
     const tbody = document.getElementById('produkTableBody');
     tbody.innerHTML = '';
+
     if (produk.length === 0) {
         if (document.getElementById('searchInput').value.trim() !== '') {
-            // Show search no results message
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="px-6 py-12 text-center">
@@ -290,13 +335,12 @@ function renderTable(produk) {
                 </tr>
             `;
         } else {
-            // Show no data message
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center">
                             <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
                             <p class="text-gray-500 font-medium">Tidak ada data produk</p>
                             <p class="text-gray-400 text-sm mt-1">Mulai tambahkan produk baru</p>
@@ -315,13 +359,13 @@ function renderTable(produk) {
                     <div class="flex items-center">
                         <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden ${item.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold'}">
                             ${item.image
-                                ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-10 w-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-semibold\\'>${item.nama.charAt(0).toUpperCase()}</div>'">`
+                                ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover">`
                                 : item.nama.charAt(0).toUpperCase()
                             }
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-medium text-gray-900">${item.nama}</p>
-                            <p class="text-xs text-gray-500">${item.deskripsi || '-'}</p>
+                            <p class="text-xs text-gray-500">${item.deskripsi ? (item.deskripsi.length > 30 ? item.deskripsi.substring(0, 30) + '...' : item.deskripsi) : '-'}</p>
                         </div>
                     </div>
                 </td>
@@ -369,7 +413,7 @@ function renderPagination(pagination) {
     html += `<p class="text-sm text-gray-600">Menampilkan ${((pagination.current_page - 1) * pagination.per_page) + 1} - ${Math.min(pagination.current_page * pagination.per_page, pagination.total)} dari ${pagination.total} data</p>`;
     html += '<div class="flex gap-1">';
 
-    // Previous button - always visible
+    // Previous button
     if (pagination.current_page > 1) {
         html += `
             <button onclick="loadProduk(${pagination.current_page - 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Previous">
@@ -397,7 +441,7 @@ function renderPagination(pagination) {
         }
     }
 
-    // Next button - always visible
+    // Next button
     if (pagination.current_page < pagination.last_page) {
         html += `
             <button onclick="loadProduk(${pagination.current_page + 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Next">
@@ -428,6 +472,8 @@ function openCreateModal() {
     document.getElementById('modalTitle').textContent = 'Tambah Produk';
     document.getElementById('produkForm').reset();
     document.getElementById('produkId').value = '';
+    document.getElementById('imagePreview').classList.add('hidden');
+    clearValidationErrors();
     loadKategoriOptions();
     document.getElementById('produkModal').classList.remove('hidden');
 }
@@ -446,11 +492,9 @@ function loadKategoriOptions() {
         data.data.forEach(kategori => {
             select.innerHTML += `<option value="${kategori.id_kategori}">${kategori.nama_kategori}</option>`;
         });
-        return data; // Return data so the promise resolves
     })
     .catch(error => {
         console.error('Error loading kategori:', error);
-        throw error; // Re-throw so the calling code can handle it
     });
 }
 
@@ -464,66 +508,97 @@ function editProduk(id) {
         document.getElementById('harga').value = data.harga;
         document.getElementById('stok').value = data.stok;
         document.getElementById('deskripsi').value = data.deskripsi || '';
+        
         loadKategoriOptions().then(() => {
             document.getElementById('id_kategori').value = data.id_kategori;
         });
-        // Handle image preview for edit
+        
         if (data.image) {
             document.getElementById('previewImg').src = `/storage/${data.image}`;
             document.getElementById('imagePreview').classList.remove('hidden');
         } else {
             document.getElementById('imagePreview').classList.add('hidden');
         }
+        
+        clearValidationErrors();
         document.getElementById('produkModal').classList.remove('hidden');
     })
     .catch(error => console.error('Error:', error));
+}
+
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
 function saveProduk() {
     const form = document.getElementById('produkForm');
     const formData = new FormData(form);
     const id = document.getElementById('produkId').value;
-
     const url = id ? `{{ route('pegawai.produk.index') }}/${id}` : '{{ route('pegawai.produk.index') }}';
-    const method = id ? 'POST' : 'POST';
 
     if (id) {
         formData.append('_method', 'PUT');
     }
 
+    clearValidationErrors();
+
     fetch(url, {
-        method: method,
+        method: 'POST',
         body: formData,
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Accept': 'application/json',
         }
     })
-    .then(async response => {
-        if (response.status === 422) { // Tangkap error validasi
-            const data = await response.json();
-            displayValidationErrors(data.errors);
-            throw new Error('Validation failed'); // Hentikan promise chain
-        }
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             closeModal();
             loadProduk(currentPage);
             showAlert('Produk berhasil ' + (id ? 'diupdate' : 'ditambahkan'), 'success');
         } else {
-            showAlert(data.message || 'Terjadi kesalahan', 'error');
+            if (data.errors) {
+                displayValidationErrors(data.errors);
+            } else {
+                showAlert('Terjadi kesalahan', 'error');
+            }
         }
     })
     .catch(error => {
-        if (error.message !== 'Validation failed') {
-            console.error('Error:', error);
-            showAlert('Terjadi kesalahan', 'error');
+        console.error('Error:', error);
+        showAlert('Terjadi kesalahan', 'error');
+    });
+}
+
+function displayValidationErrors(errors) {
+    clearValidationErrors();
+    for (const field in errors) {
+        const input = document.getElementById(field);
+        if (input) {
+            input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+            const errorEl = document.createElement('p');
+            errorEl.className = 'text-xs text-red-600 mt-1';
+            errorEl.textContent = errors[field][0];
+            input.parentNode.appendChild(errorEl);
         }
+    }
+}
+
+function clearValidationErrors() {
+    const form = document.getElementById('produkForm');
+    form.querySelectorAll('.border-red-500').forEach(el => {
+        el.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+    });
+    form.querySelectorAll('p.text-red-600').forEach(el => {
+        el.remove();
     });
 }
 
@@ -556,6 +631,29 @@ function confirmDelete() {
     });
 }
 
+function viewProduk(id) {
+    fetch(`{{ route('pegawai.produk.index') }}/${id}`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('viewNama').textContent = data.nama;
+        document.getElementById('viewKategori').textContent = data.kategori ? data.kategori.nama_kategori : '-';
+        document.getElementById('viewHarga').textContent = 'Rp ' + parseInt(data.harga).toLocaleString('id-ID');
+        document.getElementById('viewStok').textContent = data.stok;
+        document.getElementById('viewDeskripsi').textContent = data.deskripsi || '-';
+
+        const viewImageDiv = document.getElementById('viewImage');
+        if (data.image) {
+            viewImageDiv.innerHTML = `<img src="/storage/${data.image}" alt="${data.nama}" class="h-full w-full object-cover">`;
+        } else {
+            viewImageDiv.innerHTML = data.nama.charAt(0).toUpperCase();
+            viewImageDiv.className = 'flex-shrink-0 h-20 w-20 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-2xl';
+        }
+
+        document.getElementById('viewModal').classList.remove('hidden');
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 function closeModal() {
     document.getElementById('produkModal').classList.add('hidden');
 }
@@ -569,80 +667,6 @@ function closeViewModal() {
     document.getElementById('viewModal').classList.add('hidden');
 }
 
-function viewProduk(id) {
-    closeModal();
-    closeDeleteModal();
-    fetch(`{{ route('pegawai.produk.index') }}/${id}`)
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('viewNama').textContent = data.nama;
-        document.getElementById('viewKategori').textContent = data.kategori ? data.kategori.nama_kategori : '-';
-        document.getElementById('viewHarga').textContent = 'Rp ' + parseInt(data.harga).toLocaleString('id-ID');
-        document.getElementById('viewStok').textContent = data.stok;
-        document.getElementById('viewKategoriDetail').textContent = data.kategori ? data.kategori.nama_kategori : '-';
-        document.getElementById('viewDeskripsi').textContent = data.deskripsi || '-';
-
-        // Handle image display
-        const viewImageDiv = document.getElementById('viewImage');
-        if (data.image) {
-            viewImageDiv.innerHTML = `<img src="/storage/${data.image}" alt="${data.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-20 w-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-2xl\\'>${data.nama.charAt(0).toUpperCase()}</div>'">`;
-        } else {
-            viewImageDiv.innerHTML = `<div class="h-20 w-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">${data.nama.charAt(0).toUpperCase()}</div>`;
-        }
-
-        document.getElementById('viewModal').classList.remove('hidden');
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function clearValidationErrors() {
-    const form = document.getElementById('produkForm');
-
-    // Hapus style error dari semua input
-    form.querySelectorAll('.border-red-500').forEach(el => {
-        el.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-    });
-
-    // Hapus semua elemen pesan error
-    form.querySelectorAll('p.text-red-600').forEach(el => {
-        el.remove();
-    });
-}
-
-function displayValidationErrors(errors) {
-    for (const field in errors) {
-        const input = document.getElementById(field);
-        if (input) {
-            // Tambahkan style error ke input
-            input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-
-            // Buat dan tampilkan elemen pesan error
-            const errorEl = document.createElement('p');
-            errorEl.className = 'text-xs text-red-600 mt-1';
-            errorEl.textContent = errors[field][0]; // Ambil pesan error pertama
-
-            // Sisipkan setelah input atau parent-nya jika lebih kompleks (spt foto)
-            if(field === 'image') {
-                input.closest('.flex-1').appendChild(errorEl);
-            } else {
-                input.parentNode.appendChild(errorEl);
-            }
-        }
-    }
-}
-
 function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg transform transition-all duration-300 flex items-center gap-3 ${
@@ -652,8 +676,10 @@ function showAlert(message, type) {
     const icon = type === 'success'
         ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
         : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    
     alertDiv.innerHTML = icon + '<span class="font-medium">' + message + '</span>';
     document.body.appendChild(alertDiv);
+    
     setTimeout(() => {
         alertDiv.style.opacity = '0';
         alertDiv.style.transform = 'translateX(100%)';
@@ -661,6 +687,31 @@ function showAlert(message, type) {
             document.body.removeChild(alertDiv);
         }, 300);
     }, 3000);
+}
+
+function showSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.add('pr-10');
+    
+    const existingSpinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (existingSpinner) {
+        existingSpinner.remove();
+    }
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'search-spinner absolute right-3 top-1/2 transform -translate-y-1/2';
+    spinner.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>';
+    searchInput.parentElement.appendChild(spinner);
+}
+
+function hideSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.remove('pr-10');
+    
+    const spinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (spinner) {
+        spinner.remove();
+    }
 }
 </script>
 @endsection

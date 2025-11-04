@@ -20,9 +20,7 @@ class Pelanggan extends Authenticatable
         'password',
         'no_telp',
         'alamat',
-        'poin',
         'kode_referal',
-        'kode_referal_digunakan',
         'image',
     ];
 
@@ -33,7 +31,6 @@ class Pelanggan extends Authenticatable
 
     protected $casts = [
         'password' => 'hashed',
-        'poin' => 'integer',
     ];
 
     protected static function boot()
@@ -59,41 +56,5 @@ class Pelanggan extends Authenticatable
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class, 'id_pelanggan', 'id_pelanggan');
-    }
-
-    public function poinHistori()
-    {
-        return $this->hasMany(PoinHistori::class, 'id_pelanggan', 'id_pelanggan');
-    }
-
-    public function getReferrals()
-    {
-        return self::where('kode_referal_digunakan', $this->kode_referal)->get();
-    }
-
-    public function tambahPoin($jumlah, $keterangan = null)
-    {
-        $this->increment('poin', $jumlah);
-        
-        PoinHistori::create([
-            'id_pelanggan' => $this->id_pelanggan,
-            'jenis' => 'tambah',
-            'jumlah_poin' => $jumlah,
-            'keterangan' => $keterangan,
-            'tanggal' => now(),
-        ]);
-    }
-
-    public function kurangiPoin($jumlah, $keterangan = null)
-    {
-        $this->decrement('poin', $jumlah);
-        
-        PoinHistori::create([
-            'id_pelanggan' => $this->id_pelanggan,
-            'jenis' => 'kurang',
-            'jumlah_poin' => $jumlah,
-            'keterangan' => $keterangan,
-            'tanggal' => now(),
-        ]);
     }
 }

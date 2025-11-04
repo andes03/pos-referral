@@ -48,12 +48,23 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'nama' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:100', 'unique:pelanggan'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'no_telp' => ['nullable', 'string', 'max:20'],
-            'alamat' => ['nullable', 'string'],
-            'kode_referal_digunakan' => ['nullable', 'string', 'exists:pelanggan,kode_referal'],
+            'nama' => 'required|string|max:100',
+            'email' => 'required|email|unique:pelanggan,email',
+            'password' => 'required|string|min:8|confirmed',
+            'no_telp' => 'required|regex:/^[0-9]{10,15}$/',
+            'alamat' => 'required|string',
+        ], [
+            'nama.required' => 'Nama harus diisi',
+            'nama.max' => 'Nama maksimal 100 karakter',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan, silakan gunakan email lain',
+            'password.required' => 'Password harus diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'no_telp.required' => 'Nomor telepon harus diisi',
+            'no_telp.regex' => 'Nomor telepon harus berisi 10-15 digit angka',
+            'alamat.required' => 'Alamat harus diisi',
         ]);
 
         $pelanggan = Pelanggan::create([
@@ -62,16 +73,10 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'no_telp' => $validated['no_telp'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
-            'kode_referal_digunakan' => $validated['kode_referal_digunakan'] ?? null,
         ]);
 
-        // Give referral bonus if using someone's referral code
-        if (!empty($validated['kode_referal_digunakan'])) {
-            $referrer = Pelanggan::where('kode_referal', $validated['kode_referal_digunakan'])->first();
-            if ($referrer) {
-                $referrer->tambahPoin(50, "Bonus referral dari {$pelanggan->nama}");
-            }
-        }
+        // Give initial bonus points to new customer
+        $pelanggan->tambahPoin(50, 'Bonus pendaftaran pelanggan baru');
 
         Auth::guard('pelanggan')->login($pelanggan);
 

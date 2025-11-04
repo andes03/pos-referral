@@ -14,10 +14,10 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex">
+<body class="bg-gray-100" x-data="{ showProfileInfo: false }" @click="showProfileInfo = false">
+    <div class="min-h-screen flex flex-col">
         <!-- Sidebar -->
-        <div class="w-64 bg-gray-800 shadow-lg">
+        <div class="fixed left-0 top-0 h-screen w-64 bg-gray-800 shadow-lg">
             <div class="flex items-center justify-center h-16 bg-gray-900">
                 <h1 class="text-white text-lg font-semibold">POS System</h1>
             </div>
@@ -67,12 +67,6 @@
                     Transaksi
                 </a>
 
-                <a href="{{ route('pegawai.poin-histori.index') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('pegawai.poin-histori.*') ? 'bg-gray-700 text-white' : '' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                    Poin Histori
-                </a>
             </nav>
 
             <div class="absolute bottom-0 w-64 p-4">
@@ -89,24 +83,100 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
+        <div class="ml-64 flex-1 flex flex-col h-screen overflow-y-auto">
             <!-- Top Bar -->
-            <header class="bg-white shadow-sm px-6 py-4">
+            <header class="fixed top-0 left-64 right-0 bg-white shadow-sm px-6 py-4 z-10">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-semibold text-gray-900">@yield('title', 'Dashboard')</h2>
                     <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">Welcome, {{ Auth::guard('pegawai')->user()->nama }}</span>
-                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {{ ucfirst(Auth::guard('pegawai')->user()->role) }}
-                        </span>
+                        <!-- Clickable Profile Section -->
+                        <div class="relative">
+                            <button @click.stop="showProfileInfo = !showProfileInfo" class="flex items-center space-x-3 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors cursor-pointer">
+                                @if(Auth::guard('pegawai')->user()->image)
+                                    <img src="{{ asset('storage/' . Auth::guard('pegawai')->user()->image) }}" alt="Profile Image" class="w-10 h-10 rounded-full object-cover">
+                                @else
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="flex flex-col text-left">
+                                    <span class="text-sm font-medium text-gray-900">{{ Auth::guard('pegawai')->user()->nama }}</span>
+                                    <span class="text-xs text-gray-500">{{ Auth::guard('pegawai')->user()->email }}</span>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="showProfileInfo ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Profile Dropdown Popup -->
+                            <div x-show="showProfileInfo" @click.stop x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50" style="display: none;">
+                                <div class="p-4">
+                                    <!-- Profile Header -->
+                                    <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-200">
+                                        @if(Auth::guard('pegawai')->user()->image)
+                                            <img src="{{ asset('storage/' . Auth::guard('pegawai')->user()->image) }}" alt="Profile Image" class="w-12 h-12 rounded-full object-cover">
+                                        @else
+                                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">{{ Auth::guard('pegawai')->user()->nama }}</p>
+                                            <p class="text-xs text-gray-500">{{ Auth::guard('pegawai')->user()->email }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Info -->
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">Role</span>
+                                            <span class="text-sm text-gray-900">{{ ucfirst(Auth::guard('pegawai')->user()->role) }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">Bergabung sejak</span>
+                                            <span class="text-sm text-gray-900">{{ Auth::guard('pegawai')->user()->created_at->format('M Y') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="mt-4 pt-3 border-t border-gray-200 space-y-2">
+                                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="flex items-center space-x-2 text-sm text-red-600 hover:text-red-800 w-full text-left">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                                </svg>
+                                                <span>Logout</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 p-6">
+            <main class="flex-1 p-6 pt-20">
                 @yield('content')
             </main>
+
+            <!-- Footer -->
+            <footer class="bg-white border-t border-gray-200 mt-auto">
+                <div class="px-6 py-4">
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">
+                            © {{ date('Y') }} Sebelas Coffee. All rights reserved.
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
 

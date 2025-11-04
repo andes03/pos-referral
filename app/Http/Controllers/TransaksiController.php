@@ -6,7 +6,6 @@ use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
 use App\Models\Pelanggan;
 use App\Models\Produk;
-use App\Models\PoinHistori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +43,16 @@ class TransaksiController extends Controller
             ]);
         }
 
-        return view('pegawai.transaksi.index', compact('transaksi'));
+        // Kirim data awal ke view
+        return view('pegawai.transaksi.index', [
+            'initialData' => $transaksi->items(),
+            'pagination' => [
+                'current_page' => $transaksi->currentPage(),
+                'last_page' => $transaksi->lastPage(),
+                'per_page' => $transaksi->perPage(),
+                'total' => $transaksi->total(),
+            ]
+        ]);
     }
 
     /**
@@ -118,12 +126,16 @@ class TransaksiController extends Controller
                 ];
             }
 
+            // Calculate points earned (1 point per 1000 IDR)
+            $pointsEarned = floor($total / 1000);
+
             // Create transaction
             $transaksi = Transaksi::create([
                 'id_pelanggan' => $request->id_pelanggan,
                 'id_pegawai' => $pegawai->id_pegawai,
                 'total' => $total,
                 'metode_pembayaran' => $request->metode_pembayaran,
+                'status_pembayaran' => 'paid', // Set default status
                 'tanggal_transaksi' => now(),
             ]);
 
@@ -140,23 +152,6 @@ class TransaksiController extends Controller
                 $detail['produk']->decrement('stok', $detail['jumlah']);
             }
 
-            // Add points to customer (1 point per 1000 IDR)
-            $pointsEarned = floor($total / 1000);
-            
-            if ($pointsEarned > 0) {
-                $pelanggan = Pelanggan::find($request->id_pelanggan);
-                $pelanggan->increment('poin', $pointsEarned);
-
-                // Record in point history
-                PoinHistori::create([
-                    'id_pelanggan' => $request->id_pelanggan,
-                    'jenis' => 'tambah',
-                    'jumlah_poin' => $pointsEarned,
-                    'keterangan' => 'Poin dari transaksi #' . $transaksi->id_transaksi,
-                    'tanggal' => now(),
-                ]);
-            }
-
             DB::commit();
 
             return response()->json([
@@ -165,7 +160,6 @@ class TransaksiController extends Controller
                 'redirect' => route('pegawai.transaksi.show', $transaksi->id_transaksi),
                 'data' => [
                     'id_transaksi' => $transaksi->id_transaksi,
-                    'kode_transaksi' => $transaksi->kode_transaksi,
                     'total' => $transaksi->total,
                     'poin_earned' => $pointsEarned
                 ]
@@ -230,18 +224,26 @@ class TransaksiController extends Controller
         $validated = $request->validate([
             'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
             'metode_pembayaran' => 'required|in:cash,qris,transfer',
+            'status_pembayaran' => 'nullable|in:pending,paid,failed',
         ], [
             'id_pelanggan.required' => 'Pelanggan harus dipilih',
             'id_pelanggan.exists' => 'Pelanggan tidak ditemukan',
             'metode_pembayaran.required' => 'Metode pembayaran harus dipilih',
             'metode_pembayaran.in' => 'Metode pembayaran tidak valid',
+            'status_pembayaran.in' => 'Status pembayaran tidak valid',
         ]);
 
         try {
-            $transaksi->update([
+            $updateData = [
                 'id_pelanggan' => $request->id_pelanggan,
                 'metode_pembayaran' => $request->metode_pembayaran,
-            ]);
+            ];
+
+            if ($request->has('status_pembayaran')) {
+                $updateData['status_pembayaran'] = $request->status_pembayaran;
+            }
+
+            $transaksi->update($updateData);
 
             return response()->json([
                 'success' => true,
@@ -267,9 +269,7 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
             
-            // Store pelanggan ID and total before deletion
-            $idPelanggan = $transaksi->id_pelanggan;
-            $total = $transaksi->total;
+            // Store transaction ID before deletion
             $idTransaksi = $transaksi->id_transaksi;
             
             // Restore stock for each product
@@ -277,31 +277,6 @@ class TransaksiController extends Controller
                 $produk = $detail->produk;
                 if ($produk) {
                     $produk->increment('stok', $detail->jumlah);
-                }
-            }
-
-            // Remove points from customer
-            $pointsEarned = floor($total / 1000);
-            
-            if ($pointsEarned > 0) {
-                $pelanggan = Pelanggan::find($idPelanggan);
-                
-                if ($pelanggan) {
-                    // Only decrement if customer has enough points
-                    if ($pelanggan->poin >= $pointsEarned) {
-                        $pelanggan->decrement('poin', $pointsEarned);
-                    } else {
-                        $pelanggan->update(['poin' => 0]);
-                    }
-
-                    // Record in point history
-                    PoinHistori::create([
-                        'id_pelanggan' => $idPelanggan,
-                        'jenis' => 'kurang',
-                        'jumlah_poin' => $pointsEarned,
-                        'keterangan' => 'Pengembalian poin dari transaksi yang dihapus #' . $idTransaksi,
-                        'tanggal' => now(),
-                    ]);
                 }
             }
 

@@ -40,7 +40,7 @@
             </table>
         </div>
         <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            </div>
+        </div>
     </div>
 </div>
 
@@ -128,18 +128,40 @@
     </div>
 </div>
 
-
-
 <script>
 let currentPage = 1;
 let deleteId = null;
+let searchTimeout;
+let isSearching = false;
+
+// Data awal dari server
+const initialData = @json($initialData ?? []);
+const initialPagination = @json($pagination ?? null);
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadKategori();
+    // Render data awal langsung tanpa AJAX call
+    if (initialData.length > 0) {
+        renderTable(initialData);
+        if (initialPagination) {
+            renderPagination(initialPagination);
+            currentPage = initialPagination.current_page;
+        }
+    } else {
+        // Jika memang tidak ada data, tampilkan pesan kosong
+        renderTable([]);
+    }
 
-    // Search on input change
-    document.getElementById('searchInput').addEventListener('input', function() {
-        searchData();
+    // Search on input change with debounce (increased to 600ms for better UX)
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        // Show searching indicator
+        showSearchingIndicator();
+        
+        searchTimeout = setTimeout(function() {
+            searchData();
+        }, 600); // Increased from 300ms to 600ms
     });
 
     // Form submission
@@ -150,8 +172,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadKategori(page = 1) {
+    if (isSearching) return; // Prevent multiple simultaneous requests
+    
+    isSearching = true;
     currentPage = page;
     const search = document.getElementById('searchInput').value;
+
+    // Tampilkan loading indicator
+    const tbody = document.getElementById('kategoriTableBody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="3" class="px-6 py-8 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
+                    <p class="text-gray-500 text-sm">Memuat data...</p>
+                </div>
+            </td>
+        </tr>
+    `;
 
     fetch(`{{ route('pegawai.kategori.index') }}?page=${page}&search=${encodeURIComponent(search)}`, {
         headers: {
@@ -163,8 +201,21 @@ function loadKategori(page = 1) {
     .then(data => {
         renderTable(data.data);
         renderPagination(data.pagination);
+        isSearching = false;
+        hideSearchingIndicator();
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="px-6 py-8 text-center">
+                    <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
+                </td>
+            </tr>
+        `;
+        isSearching = false;
+        hideSearchingIndicator();
+    });
 }
 
 function renderTable(kategori) {
@@ -251,7 +302,7 @@ function renderPagination(pagination) {
     html += `<p class="text-sm text-gray-600">Menampilkan ${((pagination.current_page - 1) * pagination.per_page) + 1} - ${Math.min(pagination.current_page * pagination.per_page, pagination.total)} dari ${pagination.total} data</p>`;
     html += '<div class="flex gap-1">';
 
-    // Previous button - always visible
+    // Previous button
     if (pagination.current_page > 1) {
         html += `
             <button onclick="loadKategori(${pagination.current_page - 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Previous">
@@ -279,7 +330,7 @@ function renderPagination(pagination) {
         }
     }
 
-    // Next button - always visible
+    // Next button
     if (pagination.current_page < pagination.last_page) {
         html += `
             <button onclick="loadKategori(${pagination.current_page + 1})" class="p-1.5 text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all" title="Next">
@@ -355,7 +406,6 @@ function saveKategori() {
             loadKategori(currentPage);
             showAlert('Kategori berhasil ' + (id ? 'diupdate' : 'ditambahkan'), 'success');
         } else {
-            // Handle validation errors
             if (data.errors) {
                 displayValidationErrors(data.errors);
             } else {
@@ -369,43 +419,25 @@ function saveKategori() {
     });
 }
 
-/**
- * Menampilkan pesan error validasi pada form.
- */
 function displayValidationErrors(errors) {
-    // Hapus error sebelumnya
     clearValidationErrors();
-
-    // Tampilkan error baru
     for (const field in errors) {
         const input = document.getElementById(field);
         if (input) {
-            // Tambahkan style error ke input
             input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-
-            // Buat dan tampilkan elemen pesan error
             const errorEl = document.createElement('p');
             errorEl.className = 'text-xs text-red-600 mt-1';
-            errorEl.textContent = errors[field][0]; // Ambil pesan error pertama
-
-            // Sisipkan setelah input
+            errorEl.textContent = errors[field][0];
             input.parentNode.appendChild(errorEl);
         }
     }
 }
 
-/**
- * Menghapus semua pesan dan style error validasi dari form.
- */
 function clearValidationErrors() {
     const form = document.getElementById('kategoriForm');
-
-    // Hapus style error dari semua input
     form.querySelectorAll('.border-red-500').forEach(el => {
         el.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
     });
-
-    // Hapus semua elemen pesan error
     form.querySelectorAll('p.text-red-600').forEach(el => {
         el.remove();
     });
@@ -449,8 +481,6 @@ function closeDeleteModal() {
     deleteId = null;
 }
 
-
-
 function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg transform transition-all duration-300 flex items-center gap-3 ${
@@ -460,8 +490,10 @@ function showAlert(message, type) {
     const icon = type === 'success'
         ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
         : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    
     alertDiv.innerHTML = icon + '<span class="font-medium">' + message + '</span>';
     document.body.appendChild(alertDiv);
+    
     setTimeout(() => {
         alertDiv.style.opacity = '0';
         alertDiv.style.transform = 'translateX(100%)';
@@ -469,6 +501,33 @@ function showAlert(message, type) {
             document.body.removeChild(alertDiv);
         }, 300);
     }, 3000);
+}
+
+function showSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.add('pr-10'); // Add padding for spinner
+    
+    // Remove existing spinner if any
+    const existingSpinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (existingSpinner) {
+        existingSpinner.remove();
+    }
+    
+    // Add spinner
+    const spinner = document.createElement('div');
+    spinner.className = 'search-spinner absolute right-3 top-1/2 transform -translate-y-1/2';
+    spinner.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>';
+    searchInput.parentElement.appendChild(spinner);
+}
+
+function hideSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.remove('pr-10');
+    
+    const spinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (spinner) {
+        spinner.remove();
+    }
 }
 </script>
 @endsection

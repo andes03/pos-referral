@@ -28,7 +28,6 @@ class PelangganFactory extends Factory
             'alamat' => fake()->address(),
             'poin' => fake()->numberBetween(0, 1000),
             'kode_referal' => Pelanggan::generateUniqueReferralCode(),
-            'kode_referal_digunakan' => null,
             'image' => null,
         ];
     }

@@ -28,8 +28,11 @@
                 Modern POS system with integrated membership and referral program. Earn points on every purchase and get rewarded for bringing new customers.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ route('register') }}" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition duration-150 ease-in-out">
+                    Daftar Sekarang
+                </a>
                 <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition duration-150 ease-in-out">
-                    Get Started
+                    Login
                 </a>
                 <a href="#features" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-3 rounded-lg text-lg font-medium border border-gray-300 transition duration-150 ease-in-out">
                     Learn More

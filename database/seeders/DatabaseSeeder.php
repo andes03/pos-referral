@@ -8,7 +8,6 @@ use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
-use App\Models\PoinHistori;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -46,24 +45,18 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'no_telp' => '081234567892',
             'alamat' => 'Jl. Customer No. 1',
-            'poin' => 0,
             'kode_referal' => 'REFJOHN123',
         ]);
 
-        // Create pelanggan 2 (using pelanggan1's referral)
+        // Create pelanggan 2 (without referral)
         $pelanggan2 = Pelanggan::create([
             'nama' => 'Jane Smith',
             'email' => 'jane@customer.test',
             'password' => Hash::make('password'),
             'no_telp' => '081234567893',
             'alamat' => 'Jl. Customer No. 2',
-            'poin' => 0,
             'kode_referal' => 'REFJANE456',
-            'kode_referal_digunakan' => 'REFJOHN123',
         ]);
-
-        // Give referral bonus to pelanggan1
-        $pelanggan1->tambahPoin(50, 'Bonus referral dari Jane Smith');
 
         // Create categories
         $minuman = Kategori::create([
@@ -88,6 +81,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 25000,
             'stok' => 50,
             'deskripsi' => 'Kopi espresso klasik dengan crema sempurna',
+            'image' => 'produk/0rMO9SYfgqwueovbhJA6Md3OJ9yql77opLD84shR.png',
         ]);
 
         $latte = Produk::create([
@@ -96,6 +90,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 35000,
             'stok' => 45,
             'deskripsi' => 'Espresso dengan steamed milk yang lembut',
+            'image' => 'produk/DzUyNbC3nMx8E8IcAV8Zy5nY3JOyEsgp731yWtCZ.jpg',
         ]);
 
         $cappuccino = Produk::create([
@@ -104,6 +99,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 32000,
             'stok' => 40,
             'deskripsi' => 'Espresso dengan foam milk yang tebal',
+            'image' => 'produk/YvCbcTIB2cZFr96IyUzwSUHV81hilTAvBD0EO5q4.png',
         ]);
 
         $croissant = Produk::create([
@@ -112,6 +108,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 28000,
             'stok' => 30,
             'deskripsi' => 'Croissant butter yang renyah dan lembut',
+            'image' => 'produk/0rMO9SYfgqwueovbhJA6Md3OJ9yql77opLD84shR.png',
         ]);
 
         $sandwich = Produk::create([
@@ -120,6 +117,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 45000,
             'stok' => 25,
             'deskripsi' => 'Sandwich dengan isian daging, sayuran, dan keju',
+            'image' => 'produk/DzUyNbC3nMx8E8IcAV8Zy5nY3JOyEsgp731yWtCZ.jpg',
         ]);
 
         $tiramisu = Produk::create([
@@ -128,6 +126,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 38000,
             'stok' => 20,
             'deskripsi' => 'Dessert Italia klasik dengan mascarpone dan kopi',
+            'image' => 'produk/YvCbcTIB2cZFr96IyUzwSUHV81hilTAvBD0EO5q4.png',
         ]);
 
         // Create a successful transaction
@@ -165,8 +164,8 @@ class DatabaseSeeder extends Seeder
         // Update total to correct amount
         $transaksi->update(['total' => 101000]);
 
-        // Mark transaction as paid (this will automatically add points)
-        $transaksi->markAsPaid();
+        // Mark transaction as paid
+        $transaksi->update(['status_pembayaran' => 'paid']);
 
         // Reduce stock for purchased items
         $latte->reduceStock(1);
@@ -180,6 +179,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 28000,
             'stok' => 35,
             'deskripsi' => 'Espresso dengan air panas',
+            'image' => 'produk/0rMO9SYfgqwueovbhJA6Md3OJ9yql77opLD84shR.png',
         ]);
 
         Produk::create([
@@ -188,6 +188,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 18000,
             'stok' => 50,
             'deskripsi' => 'Teh dingin segar dengan lemon',
+            'image' => 'produk/DzUyNbC3nMx8E8IcAV8Zy5nY3JOyEsgp731yWtCZ.jpg',
         ]);
 
         Produk::create([
@@ -196,6 +197,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 42000,
             'stok' => 20,
             'deskripsi' => 'Salad segar dengan dressing caesar',
+            'image' => 'produk/YvCbcTIB2cZFr96IyUzwSUHV81hilTAvBD0EO5q4.png',
         ]);
 
         Produk::create([
@@ -204,6 +206,7 @@ class DatabaseSeeder extends Seeder
             'harga' => 35000,
             'stok' => 15,
             'deskripsi' => 'New York style cheesecake',
+            'image' => 'produk/0rMO9SYfgqwueovbhJA6Md3OJ9yql77opLD84shR.png',
         ]);
     }
 }
