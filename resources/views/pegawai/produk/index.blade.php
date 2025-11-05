@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8 space-y-6">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Kelola Produk</h1>
-        <p class="text-gray-500 mt-1">Manajemen data produk perusahaan</p>
+        <p class="text-gray-500 mt-1">Manajemen data produk</p>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -28,8 +28,8 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead>
-                    <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+                <thead class="sticky top-0 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 z-10">
+                    <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Produk</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Harga</th>
@@ -118,12 +118,8 @@
                             </svg>
                             Foto Produk
                         </label>
-                        <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)"
+                        <input type="file" id="image" name="image" accept="image/*"
                                class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-                    </div>
-
-                    <div id="imagePreview" class="hidden">
-                        <img id="previewImg" src="" alt="Preview" class="h-24 w-24 rounded-lg object-cover border-2 border-gray-200">
                     </div>
 
                     <div>
@@ -278,11 +274,138 @@ function loadProduk(page = 1) {
 
     const tbody = document.getElementById('produkTableBody');
     tbody.innerHTML = `
-        <tr>
-            <td colspan="5" class="px-6 py-8 text-center">
-                <div class="flex flex-col items-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
-                    <p class="text-gray-500 text-sm">Memuat data...</p>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-20 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-36"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-28 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-16 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                 </div>
             </td>
         </tr>
@@ -472,7 +595,6 @@ function openCreateModal() {
     document.getElementById('modalTitle').textContent = 'Tambah Produk';
     document.getElementById('produkForm').reset();
     document.getElementById('produkId').value = '';
-    document.getElementById('imagePreview').classList.add('hidden');
     clearValidationErrors();
     loadKategoriOptions();
     document.getElementById('produkModal').classList.remove('hidden');
@@ -512,31 +634,14 @@ function editProduk(id) {
         loadKategoriOptions().then(() => {
             document.getElementById('id_kategori').value = data.id_kategori;
         });
-        
-        if (data.image) {
-            document.getElementById('previewImg').src = `/storage/${data.image}`;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        } else {
-            document.getElementById('imagePreview').classList.add('hidden');
-        }
-        
+
         clearValidationErrors();
         document.getElementById('produkModal').classList.remove('hidden');
     })
     .catch(error => console.error('Error:', error));
 }
 
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-}
+
 
 function saveProduk() {
     const form = document.getElementById('produkForm');

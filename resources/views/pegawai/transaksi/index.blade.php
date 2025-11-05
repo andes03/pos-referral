@@ -28,8 +28,8 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead>
-                    <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+                <thead class="sticky top-0 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 z-10">
+                    <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kode Transaksi</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Pelanggan</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Pegawai</th>
@@ -143,23 +143,214 @@
 <script>
 let currentPage = 1;
 let deleteId = null;
+let searchTimeout;
+let isSearching = false;
+
+// Data awal dari server
+const initialData = @json($initialData ?? []);
+const initialPagination = @json($pagination ?? null);
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadTransaksi();
+    // Render data awal langsung tanpa AJAX call
+    if (initialData.length > 0) {
+        renderTable(initialData);
+        if (initialPagination) {
+            renderPagination(initialPagination);
+            currentPage = initialPagination.current_page;
+        }
+    } else {
+        renderTable([]);
+    }
 
-    // Search on input change with debounce
-    let searchTimeout;
-    document.getElementById('searchInput').addEventListener('input', function() {
+    // Search on input change with debounce (600ms for better UX)
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
+
+        // Show searching indicator
+        showSearchingIndicator();
+
+        searchTimeout = setTimeout(function() {
             searchData();
-        }, 500);
+        }, 600);
     });
 });
 
 function loadTransaksi(page = 1) {
+    if (isSearching) return; // Prevent multiple simultaneous requests
+
+    isSearching = true;
     currentPage = page;
     const search = document.getElementById('searchInput').value;
+
+    const tbody = document.getElementById('transaksiTableBody');
+    tbody.innerHTML = `
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-16 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                <div class="h-3 bg-gray-200 rounded animate-pulse w-16 mt-1"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-20 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-18"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-22"></div>
+                <div class="h-3 bg-gray-200 rounded animate-pulse w-18 mt-1"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-14"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-18"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-26"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-22"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-18 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                <div class="h-3 bg-gray-200 rounded animate-pulse w-20 mt-1"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-30"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-26"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-22 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-19"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-23"></div>
+                <div class="h-3 bg-gray-200 rounded animate-pulse w-19 mt-1"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-13"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-17"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-25"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-21"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-17 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-15"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-21"></div>
+                <div class="h-3 bg-gray-200 rounded animate-pulse w-17 mt-1"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-15"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-19"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+    `;
 
     fetch(`{{ route('pegawai.transaksi.index') }}?page=${page}&search=${encodeURIComponent(search)}`, {
         headers: {
@@ -171,10 +362,20 @@ function loadTransaksi(page = 1) {
     .then(data => {
         renderTable(data.data);
         renderPagination(data.pagination);
+        isSearching = false;
+        hideSearchingIndicator();
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('Gagal memuat data transaksi', 'error');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center">
+                    <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
+                </td>
+            </tr>
+        `;
+        isSearching = false;
+        hideSearchingIndicator();
     });
 }
 
@@ -184,7 +385,6 @@ function renderTable(transaksi) {
 
     if (transaksi.length === 0) {
         if (document.getElementById('searchInput').value.trim() !== '') {
-            // Show search no results message
             tbody.innerHTML = `
                 <tr>
                     <td colspan="7" class="px-6 py-12 text-center">
@@ -199,7 +399,6 @@ function renderTable(transaksi) {
                 </tr>
             `;
         } else {
-            // Show no data message
             tbody.innerHTML = `
                 <tr>
                     <td colspan="7" class="px-6 py-12 text-center">
@@ -221,9 +420,9 @@ function renderTable(transaksi) {
         // Generate kode transaksi from date and ID
         const date = new Date(item.tanggal_transaksi);
         const kodeTransaksi = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear().toString().slice(-2)}-TRA${item.id_transaksi.toString().padStart(3, '0')}`;
-        
+
         // Format metode pembayaran
-        const metodeBadge = item.metode_pembayaran === 'cash' 
+        const metodeBadge = item.metode_pembayaran === 'cash'
             ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded">Cash</span>'
             : item.metode_pembayaran === 'qris'
             ? '<span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">QRIS</span>'
@@ -235,8 +434,18 @@ function renderTable(transaksi) {
                     <div class="text-sm font-medium text-gray-900">${kodeTransaksi}</div>
                 </td>
                 <td class="px-6 py-3">
-                    <div class="text-sm text-gray-900">${item.pelanggan?.nama || '-'}</div>
-                    <div class="text-xs text-gray-500">${item.pelanggan?.email || ''}</div>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-8 w-8 rounded-full overflow-hidden ${item.pelanggan?.image ? '' : 'bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold text-xs'}">
+                            ${item.pelanggan?.image
+                                ? `<img src="/storage/${item.pelanggan.image}" alt="${item.pelanggan.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-8 w-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold text-xs\\'>${item.pelanggan.nama.charAt(0).toUpperCase()}</div>'">`
+                                : (item.pelanggan?.nama ? item.pelanggan.nama.charAt(0).toUpperCase() : '-')
+                            }
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">${item.pelanggan?.nama || '-'}</div>
+                            <div class="text-xs text-gray-500">${item.pelanggan?.email || ''}</div>
+                        </div>
+                    </div>
                 </td>
                 <td class="px-6 py-3">
                     <div class="text-sm text-gray-900">${item.pegawai?.nama || '-'}</div>
@@ -654,6 +863,31 @@ function showAlert(message, type) {
             document.body.removeChild(alertDiv);
         }, 300);
     }, 3000);
+}
+
+function showSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.add('pr-10');
+    
+    const existingSpinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (existingSpinner) {
+        existingSpinner.remove();
+    }
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'search-spinner absolute right-3 top-1/2 transform -translate-y-1/2';
+    spinner.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>';
+    searchInput.parentElement.appendChild(spinner);
+}
+
+function hideSearchingIndicator() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.classList.remove('pr-10');
+    
+    const spinner = searchInput.parentElement.querySelector('.search-spinner');
+    if (spinner) {
+        spinner.remove();
+    }
 }
 </script>
 @endsection

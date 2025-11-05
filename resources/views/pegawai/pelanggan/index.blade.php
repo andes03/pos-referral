@@ -127,15 +127,8 @@
                             </svg>
                             Foto Profil
                         </label>
-                        <div class="flex items-center gap-3">
-                            <div id="imagePreview" class="flex-shrink-0 hidden">
-                                <img id="previewImg" src="" alt="Preview" class="h-16 w-16 rounded-lg object-cover border-2 border-gray-200">
-                            </div>
-                            <div class="flex-1">
-                                <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)"
-                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-                            </div>
-                        </div>
+                        <input type="file" id="image" name="image" accept="image/*"
+                               class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                     </div>
 
                     <div>
@@ -288,11 +281,138 @@ function loadPelanggan(page = 1) {
     // Tampilkan loading indicator
     const tbody = document.getElementById('pelangganTableBody');
     tbody.innerHTML = `
-        <tr>
-            <td colspan="5" class="px-6 py-8 text-center">
-                <div class="flex flex-col items-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
-                    <p class="text-gray-500 text-sm">Memuat data...</p>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-20 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-36"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-28 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-16 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div class="ml-3">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                 </div>
             </td>
         </tr>
@@ -475,7 +595,6 @@ function openCreateModal() {
     document.getElementById('pelangganId').value = '';
     document.getElementById('password').required = true;
     document.getElementById('kode_referal').value = generateReferralCode();
-    document.getElementById('imagePreview').classList.add('hidden');
     clearValidationErrors();
     document.getElementById('pelangganModal').classList.remove('hidden');
 }
@@ -502,15 +621,7 @@ function editPelanggan(id) {
         document.getElementById('alamat').value = data.alamat || '';
         document.getElementById('kode_referal').value = data.kode_referal;
         document.getElementById('password').required = false;
-        
-        // Show existing image preview
-        if (data.image) {
-            document.getElementById('previewImg').src = '/storage/' + data.image;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        } else {
-            document.getElementById('imagePreview').classList.add('hidden');
-        }
-        
+
         clearValidationErrors();
         document.getElementById('pelangganModal').classList.remove('hidden');
     })
@@ -629,17 +740,7 @@ function viewPelanggan(id) {
     .catch(error => console.error('Error:', error));
 }
 
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-}
+
 
 function clearValidationErrors() {
     const form = document.getElementById('pelangganForm');

@@ -28,8 +28,9 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead>
-                    <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+                <thead class="sticky top-0 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 z-10">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Foto</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
@@ -132,13 +133,9 @@
                                 </svg>
                                 Foto Profil
                             </label>
-                            <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)"
+                            <input type="file" id="image" name="image" accept="image/*"
                                    class="w-full px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                         </div>
-                    </div>
-
-                    <div id="imagePreview" class="hidden">
-                        <img id="previewImg" src="" alt="Preview" class="h-24 w-24 rounded-lg object-cover border-2 border-gray-200">
                     </div>
 
                     <div>
@@ -294,11 +291,123 @@ function loadPegawai(page = 1) {
 
     const tbody = document.getElementById('pegawaiTableBody');
     tbody.innerHTML = `
-        <tr>
-            <td colspan="5" class="px-6 py-8 text-center">
-                <div class="flex flex-col items-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
-                    <p class="text-gray-500 text-sm">Memuat data...</p>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                 </div>
             </td>
         </tr>
@@ -372,17 +481,15 @@ function renderTable(pegawai) {
         const row = `
             <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-3">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden ${item.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold'}">
-                            ${item.image 
-                                ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover">` 
-                                : item.nama.charAt(0).toUpperCase()
-                            }
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">${item.nama}</p>
-                        </div>
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden ${item.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold'}">
+                        ${item.image
+                            ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-10 w-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-semibold\\'>${item.nama.charAt(0).toUpperCase()}</div>'">`
+                            : item.nama.charAt(0).toUpperCase()
+                        }
                     </div>
+                </td>
+                <td class="px-6 py-3">
+                    <p class="text-sm font-medium text-gray-900">${item.nama}</p>
                 </td>
                 <td class="px-6 py-3 text-sm text-gray-600">${item.email}</td>
                 <td class="px-6 py-3">
@@ -490,7 +597,6 @@ function openCreateModal() {
     document.getElementById('password').required = true;
     document.getElementById('passwordRequired').classList.remove('hidden');
     document.getElementById('passwordHint').textContent = 'Minimal 8 karakter';
-    document.getElementById('imagePreview').classList.add('hidden');
     clearValidationErrors();
     document.getElementById('pegawaiModal').classList.remove('hidden');
 }
@@ -510,32 +616,14 @@ function editPegawai(id) {
         document.getElementById('password').value = '';
         document.getElementById('passwordRequired').classList.add('hidden');
         document.getElementById('passwordHint').textContent = 'Kosongkan jika tidak ingin mengubah password';
-        
-        // Show existing image preview if available
-        if (data.image) {
-            document.getElementById('previewImg').src = '/storage/' + data.image;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        } else {
-            document.getElementById('imagePreview').classList.add('hidden');
-        }
-        
+
         clearValidationErrors();
         document.getElementById('pegawaiModal').classList.remove('hidden');
     })
     .catch(error => console.error('Error:', error));
 }
 
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
-}
+
 
 function savePegawai() {
     const form = document.getElementById('pegawaiForm');

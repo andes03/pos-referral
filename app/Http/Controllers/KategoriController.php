@@ -13,7 +13,7 @@ class KategoriController extends Controller
         $kategori = Kategori::when($search, function ($query) use ($search) {
             $query->where('nama_kategori', 'like', '%' . $search . '%')
                   ->orWhere('deskripsi', 'like', '%' . $search . '%');
-        })->paginate(10);
+        })->orderBy('created_at', 'desc')->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([

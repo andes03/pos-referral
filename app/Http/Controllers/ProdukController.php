@@ -25,7 +25,7 @@ class ProdukController extends Controller
                           $q->where('nama_kategori', 'like', '%' . $search . '%');
                       });
             })
-            ->paginate(10);
+            ->orderBy('created_at', 'desc')->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([

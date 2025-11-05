@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'POS & Referral System') }} - Employee Dashboard</title>
+    <title>{{ config('app.name', 'POS & Referral System') }} - Pegawai Dashboard</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -85,9 +85,8 @@
         <!-- Main Content -->
         <div class="ml-64 flex-1 flex flex-col h-screen overflow-y-auto">
             <!-- Top Bar -->
-            <header class="fixed top-0 left-64 right-0 bg-white shadow-sm px-6 py-4 z-10">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-gray-900">@yield('title', 'Dashboard')</h2>
+            <header class="fixed top-0 left-64 right-0 bg-white shadow-sm px-6 py-2 z-10">
+                <div class="flex items-center justify-end">
                     <div class="flex items-center space-x-4">
                         <!-- Clickable Profile Section -->
                         <div class="relative">
@@ -136,10 +135,7 @@
                                             <span class="text-xs text-gray-500">Role</span>
                                             <span class="text-sm text-gray-900">{{ ucfirst(Auth::guard('pegawai')->user()->role) }}</span>
                                         </div>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-xs text-gray-500">Bergabung sejak</span>
-                                            <span class="text-sm text-gray-900">{{ Auth::guard('pegawai')->user()->created_at->format('M Y') }}</span>
-                                        </div>
+                                       
                                     </div>
 
                                     <!-- Actions -->

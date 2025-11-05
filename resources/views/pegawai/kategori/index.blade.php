@@ -28,8 +28,8 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full">
-                <thead>
-                    <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+                <thead class="sticky top-0 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 z-10">
+                    <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nama Kategori</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Deskripsi</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
@@ -181,11 +181,73 @@ function loadKategori(page = 1) {
     // Tampilkan loading indicator
     const tbody = document.getElementById('kategoriTableBody');
     tbody.innerHTML = `
-        <tr>
-            <td colspan="3" class="px-6 py-8 text-center">
-                <div class="flex flex-col items-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
-                    <p class="text-gray-500 text-sm">Memuat data...</p>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+            </td>
+        </tr>
+        <tr class="border-b border-gray-100">
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+            </td>
+            <td class="px-6 py-3">
+                <div class="flex items-center justify-end gap-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                 </div>
             </td>
         </tr>
@@ -261,14 +323,7 @@ function renderTable(kategori) {
         const row = `
             <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-3">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold">
-                            ${item.nama_kategori.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">${item.nama_kategori}</p>
-                        </div>
-                    </div>
+                    <p class="text-sm font-medium text-gray-900">${item.nama_kategori}</p>
                 </td>
                 <td class="px-6 py-3 text-sm text-gray-600">${item.deskripsi || '-'}</td>
                 <td class="px-6 py-3">

@@ -23,9 +23,13 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with(['pelanggan', 'pegawai', 'detailTransaksi.produk'])
             ->when($search, function ($query) use ($search) {
                 $query->where('id_transaksi', 'like', '%' . $search . '%')
+                      ->orWhere('metode_pembayaran', 'like', '%' . $search . '%')
                       ->orWhereHas('pelanggan', function ($q) use ($search) {
                           $q->where('nama', 'like', '%' . $search . '%')
                             ->orWhere('email', 'like', '%' . $search . '%');
+                      })
+                      ->orWhereHas('pegawai', function ($q) use ($search) {
+                          $q->where('nama', 'like', '%' . $search . '%');
                       });
             })
             ->orderBy('tanggal_transaksi', 'desc')
