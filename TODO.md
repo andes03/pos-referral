@@ -1,12 +1,7 @@
-# TODO: Update Transaksi Index to Match Produk Fast Loading and Search
+# TODO: Implement Referral Code Discount Feature
 
 ## Tasks
-- [ ] Update TransaksiController::index to pass initialData and pagination for non-AJAX requests
-- [ ] Update transaksi/index.blade.php to render initial data immediately on load
-- [ ] Add search indicator functions (showSearchingIndicator, hideSearchingIndicator) to transaksi view
-- [ ] Adjust search debounce to 600ms for consistency
-- [ ] Add isSearching flag to prevent multiple simultaneous requests
-- [ ] Update loadTransaksi to handle indicators and isSearching
-- [ ] Test initial page load speed (no AJAX delay)
-- [ ] Test search functionality (debounce, indicator, filtering)
-- [ ] Verify pagination works with initial and AJAX loads
+- [x] Edit resources/views/pegawai/transaksi/create.blade.php to add kode_referal input field after customer selection
+- [x] Update JavaScript in create.blade.php to add logic for checking referral code match and auto-applying 10% discount
+- [x] Edit app/Http/Controllers/TransaksiController.php store method to handle kode_referal validation and ensure discount is applied correctly
+- [x] Test the functionality to ensure discount is applied only when referral code matches

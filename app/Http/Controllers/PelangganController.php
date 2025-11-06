@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
+use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PelangganController extends Controller
 {
@@ -54,10 +56,15 @@ class PelangganController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pelanggan,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:pelanggan,email',
+                Rule::unique('pegawai', 'email'),
+            ],
             'password' => 'required|string|min:8',
             'no_telp' => ['nullable', 'regex:/^[0-9]{10,15}$/'],
-            'alamat' => 'nullable|string',
+            'alamat' => 'required|string',
             'kode_referal' => 'required|string|max:20|unique:pelanggan,kode_referal',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
@@ -69,6 +76,7 @@ class PelangganController extends Controller
             'password.required' => 'Password harus diisi',
             'password.min' => 'Password minimal 8 karakter',
             'no_telp.regex' => 'Nomor telepon harus berisi 10-15 digit angka',
+            'alamat.required' => 'Alamat harus diisi',
             'kode_referal.required' => 'Kode referal harus diisi',
             'kode_referal.unique' => 'Kode referal sudah digunakan',
             'image.image' => 'File harus berupa gambar',
@@ -102,10 +110,15 @@ class PelangganController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pelanggan,email,' . $pelanggan->id_pelanggan . ',id_pelanggan',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('pelanggan', 'email')->ignore($pelanggan->id_pelanggan, 'id_pelanggan'),
+                Rule::unique('pegawai', 'email'),
+            ],
             'password' => 'nullable|string|min:8',
             'no_telp' => ['nullable', 'regex:/^[0-9]{10,15}$/'],
-            'alamat' => 'nullable|string',
+            'alamat' => 'required|string',
             'kode_referal' => 'required|string|max:20|unique:pelanggan,kode_referal,' . $pelanggan->id_pelanggan . ',id_pelanggan',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [

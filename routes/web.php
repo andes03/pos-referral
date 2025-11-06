@@ -12,9 +12,7 @@ use App\Http\Controllers\TransaksiController;
 
 
 // Landing page
-Route::get('/', function () {
-    return view('landing');
-});
+Route::get('/', [App\Http\Controllers\LandingController::class, 'index']);
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -37,8 +35,12 @@ Route::middleware(['auth.pegawai'])->prefix('pegawai')->name('pegawai.')->group(
     Route::resource('pelanggan', PelangganController::class);
     Route::resource('kategori', KategoriController::class);
     Route::resource('produk', ProdukController::class);
+    
+    // Route verify referral HARUS SEBELUM resource transaksi
+    Route::post('transaksi/verify-referral', [TransaksiController::class, 'verifyReferral'])
+        ->name('transaksi.verifyReferral');
+    
     Route::resource('transaksi', TransaksiController::class);
-
 });
 
 // Pelanggan routes (protected by pelanggan middleware)

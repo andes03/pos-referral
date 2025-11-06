@@ -47,7 +47,6 @@ class TransaksiController extends Controller
             ]);
         }
 
-        // Kirim data awal ke view
         return view('pegawai.transaksi.index', [
             'initialData' => $transaksi->items(),
             'pagination' => [
@@ -71,14 +70,42 @@ class TransaksiController extends Controller
     }
 
     /**
+     * Verify referral code
+     */
+    public function verifyReferral(Request $request)
+    {
+        $request->validate([
+            'kode_referal' => 'required|string',
+            'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan'
+        ]);
+
+        $pelanggan = Pelanggan::where('id_pelanggan', $request->id_pelanggan)
+                              ->where('kode_referal', $request->kode_referal)
+                              ->first();
+
+        if ($pelanggan) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode referral valid! Diskon 10% diterapkan',
+                'diskon' => 10
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Kode referral tidak cocok dengan pelanggan'
+        ], 422);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
             'metode_pembayaran' => 'required|in:cash,qris,transfer',
+            'kode_referal' => 'nullable|string',
             'produk' => 'required|array|min:1',
             'produk.*.id_produk' => 'required|exists:produk,id_produk',
             'produk.*.jumlah' => 'required|integer|min:1',
@@ -97,17 +124,28 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get authenticated pegawai
             $pegawai = Auth::guard('pegawai')->user();
             
             if (!$pegawai) {
                 throw new \Exception('Pegawai tidak ditemukan. Silakan login kembali.');
             }
 
-            $total = 0;
+            // Verify referral code if provided
+            $diskonPersen = 0;
+            if ($request->filled('kode_referal')) {
+                $pelanggan = Pelanggan::where('id_pelanggan', $request->id_pelanggan)
+                                      ->where('kode_referal', $request->kode_referal)
+                                      ->first();
+                
+                if ($pelanggan) {
+                    $diskonPersen = 10; // 10% discount for valid referral
+                }
+            }
+
+            $subtotal = 0;
             $produkDetails = [];
 
-            // Validate stock and calculate total
+            // Validate stock and calculate subtotal
             foreach ($request->produk as $item) {
                 $produk = Produk::lockForUpdate()->find($item['id_produk']);
                 
@@ -115,22 +153,25 @@ class TransaksiController extends Controller
                     throw new \Exception("Produk dengan ID {$item['id_produk']} tidak ditemukan");
                 }
                 
-                // Check stock availability
                 if ($produk->stok < $item['jumlah']) {
                     throw new \Exception("Stok produk '{$produk->nama}' tidak mencukupi. Stok tersedia: {$produk->stok}, diminta: {$item['jumlah']}");
                 }
                 
-                $subtotal = $produk->harga * $item['jumlah'];
-                $total += $subtotal;
+                $itemSubtotal = $produk->harga * $item['jumlah'];
+                $subtotal += $itemSubtotal;
                 
                 $produkDetails[] = [
                     'produk' => $produk,
                     'jumlah' => $item['jumlah'],
-                    'subtotal' => $subtotal
+                    'subtotal' => $itemSubtotal
                 ];
             }
 
-            // Calculate points earned (1 point per 1000 IDR)
+            // Calculate total after discount
+            $diskonAmount = ($subtotal * $diskonPersen) / 100;
+            $total = $subtotal - $diskonAmount;
+
+            // Calculate points earned (1 point per 1000 IDR from final total)
             $pointsEarned = floor($total / 1000);
 
             // Create transaction
@@ -139,7 +180,7 @@ class TransaksiController extends Controller
                 'id_pegawai' => $pegawai->id_pegawai,
                 'total' => $total,
                 'metode_pembayaran' => $request->metode_pembayaran,
-                'status_pembayaran' => 'paid', // Set default status
+                'status_pembayaran' => 'paid',
                 'tanggal_transaksi' => now(),
             ]);
 
@@ -152,7 +193,6 @@ class TransaksiController extends Controller
                     'subtotal' => $detail['subtotal'],
                 ]);
 
-                // Update stock
                 $detail['produk']->decrement('stok', $detail['jumlah']);
             }
 
@@ -164,7 +204,10 @@ class TransaksiController extends Controller
                 'redirect' => route('pegawai.transaksi.show', $transaksi->id_transaksi),
                 'data' => [
                     'id_transaksi' => $transaksi->id_transaksi,
-                    'total' => $transaksi->total,
+                    'subtotal' => $subtotal,
+                    'diskon_persen' => $diskonPersen,
+                    'diskon_amount' => $diskonAmount,
+                    'total' => $total,
                     'poin_earned' => $pointsEarned
                 ]
             ], 201);
@@ -195,7 +238,6 @@ class TransaksiController extends Controller
      */
     public function show(Transaksi $transaksi)
     {
-        // Load relationships for API request
         if (request()->wantsJson() || request()->ajax()) {
             $transaksi->load(['pelanggan', 'pegawai', 'detailTransaksi.produk']);
             
@@ -205,7 +247,6 @@ class TransaksiController extends Controller
             ]);
         }
         
-        // Return view for web request
         return view('pegawai.transaksi.show', compact('transaksi'));
     }
 
@@ -273,10 +314,8 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
             
-            // Store transaction ID before deletion
             $idTransaksi = $transaksi->id_transaksi;
             
-            // Restore stock for each product
             foreach ($transaksi->detailTransaksi as $detail) {
                 $produk = $detail->produk;
                 if ($produk) {
@@ -284,7 +323,6 @@ class TransaksiController extends Controller
                 }
             }
 
-            // Delete transaction (detail_transaksi will be deleted automatically via cascade)
             $transaksi->delete();
             
             DB::commit();

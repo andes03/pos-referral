@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -49,7 +50,12 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pelanggan,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:pelanggan,email',
+                Rule::unique('pegawai', 'email'),
+            ],
             'password' => 'required|string|min:8|confirmed',
             'no_telp' => 'required|regex:/^[0-9]{10,15}$/',
             'alamat' => 'required|string',
@@ -75,8 +81,6 @@ class AuthController extends Controller
             'alamat' => $validated['alamat'] ?? null,
         ]);
 
-        // Give initial bonus points to new customer
-        $pelanggan->tambahPoin(50, 'Bonus pendaftaran pelanggan baru');
 
         Auth::guard('pelanggan')->login($pelanggan);
 

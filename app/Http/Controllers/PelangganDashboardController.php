@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
+use App\Models\Pegawai;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class PelangganDashboardController extends Controller
 {
@@ -47,7 +49,12 @@ class PelangganDashboardController extends Controller
 
         $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pelanggan,email,' . $pelanggan->id_pelanggan . ',id_pelanggan',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('pelanggan', 'email')->ignore($pelanggan->id_pelanggan, 'id_pelanggan'),
+                Rule::unique('pegawai', 'email'),
+            ],
             'no_telp' => 'nullable|string|max:20',
             'alamat' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
