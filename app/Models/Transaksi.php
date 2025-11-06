@@ -18,7 +18,8 @@ class Transaksi extends Model
         'total',
         'metode_pembayaran',
         'status_pembayaran',
-        'tanggal_transaksi'
+        'tanggal_transaksi',
+        'kode_referal'
     ];
 
     protected $casts = [

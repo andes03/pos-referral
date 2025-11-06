@@ -35,6 +35,12 @@
             </div>
         </div>
 
+        @php
+            $subtotal = $transaksi->detailTransaksi->sum('subtotal');
+            $diskon = $subtotal - $transaksi->total;
+            $hasDiskon = $diskon > 0;
+        @endphp
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Receipt Preview -->
             <div class="lg:col-span-1">
@@ -92,8 +98,26 @@
                             <div class="text-xs space-y-1">
                                 <div class="flex justify-between">
                                     <span>Subtotal</span>
-                                    <span>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</span>
+                                    <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                                 </div>
+                                
+                                @if($hasDiskon)
+                                <div class="py-1 bg-green-50 rounded px-2 -mx-2">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <span class="text-green-700 font-medium flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Diskon Referral 10%
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Potongan</span>
+                                        <span class="text-red-600 font-bold">-Rp {{ number_format($diskon, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                                @endif
+
                                 <div class="flex justify-between font-bold text-sm pt-1">
                                     <span>TOTAL</span>
                                     <span>Rp {{ number_format($transaksi->total, 0, ',', '.') }}</span>
@@ -155,6 +179,9 @@
                             <div class="ml-3">
                                 <p class="text-xs font-medium text-gray-600">Total</p>
                                 <p class="text-sm font-bold text-gray-900">Rp {{ number_format($transaksi->total, 0, ',', '.') }}</p>
+                                @if($hasDiskon)
+                                <p class="text-xs text-green-600 font-medium">Hemat Rp {{ number_format($diskon, 0, ',', '.') }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -192,7 +219,7 @@
                                 <p class="text-xs text-gray-900">{{ $transaksi->tanggal_transaksi->format('d M Y, H:i') }}</p>
                             </div>
                             <div>
-                                <label class="text-xs font-medium text-gray-600">Pegawai</label>
+                                <label class="text-xs font-medium text-gray-600">Kasir</label>
                                 <p class="text-xs text-gray-900">{{ $transaksi->pegawai->nama ?? '-' }}</p>
                             </div>
                         </div>
@@ -259,6 +286,41 @@
                                     </td>
                                 </tr>
                                 @endforelse
+                                
+                                <!-- Summary Footer -->
+                                <tr class="bg-gray-50 font-medium">
+                                    <td colspan="3" class="px-4 py-2 text-right text-xs text-gray-700">
+                                        Subtotal
+                                    </td>
+                                    <td class="px-4 py-2 text-right text-xs text-gray-900">
+                                        Rp {{ number_format($subtotal, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                                
+                                @if($hasDiskon)
+                                <tr class="bg-green-50">
+                                    <td colspan="3" class="px-4 py-2 text-right text-xs text-green-700 font-medium">
+                                        <span class="flex items-center justify-end gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Diskon Referral (10%)
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-2 text-right text-xs text-red-600 font-bold">
+                                        -Rp {{ number_format($diskon, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                                @endif
+                                
+                                <tr class="bg-gray-100 font-bold">
+                                    <td colspan="3" class="px-4 py-3 text-right text-sm text-gray-900">
+                                        TOTAL BAYAR
+                                    </td>
+                                    <td class="px-4 py-3 text-right text-sm text-green-600">
+                                        Rp {{ number_format($transaksi->total, 0, ',', '.') }}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -275,7 +337,11 @@ function printNota() {
     const metode = '{{ $transaksi->metode_pembayaran === 'cash' ? 'Cash' : ($transaksi->metode_pembayaran === 'qris' ? 'QRIS' : 'Transfer Bank') }}';
     const pegawai = '{{ $transaksi->pegawai->nama ?? '-' }}';
     const pelanggan = '{{ $transaksi->pelanggan->nama ?? '-' }}';
-    const total = '{{ number_format($transaksi->total, 0, ',', '.') }}';
+    
+    const subtotal = {{ $subtotal }};
+    const diskon = {{ $diskon }};
+    const total = {{ $transaksi->total }};
+    const hasDiskon = {{ $hasDiskon ? 'true' : 'false' }};
 
     // Get product list
     const produkItems = @json($transaksi->detailTransaksi);
@@ -285,7 +351,7 @@ function printNota() {
         const nama = item.produk.nama;
         const qty = item.jumlah;
         const harga = (item.subtotal / item.jumlah).toLocaleString('id-ID');
-        const subtotal = item.subtotal.toLocaleString('id-ID');
+        const subtotalItem = item.subtotal.toLocaleString('id-ID');
 
         produkHTML += `
             <tr>
@@ -293,7 +359,7 @@ function printNota() {
                     <div style="font-weight: bold;">${nama}</div>
                     <div style="color: #666; display: flex; justify-content: space-between; font-size: 10px;">
                         <span>${qty} x Rp ${harga}</span>
-                        <span style="font-weight: bold;">Rp ${subtotal}</span>
+                        <span style="font-weight: bold;">Rp ${subtotalItem}</span>
                     </div>
                 </td>
             </tr>
@@ -337,6 +403,20 @@ function printNota() {
             .text-sm { font-size: 11px; }
             .text-xl { font-size: 16px; }
             h1 { font-size: 18px; margin-bottom: 4px; }
+            .discount-box {
+                background: #f0fdf4;
+                padding: 6px;
+                margin: 6px -6px;
+                border-radius: 4px;
+            }
+            .discount-label {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2px;
+                color: #166534;
+                font-weight: bold;
+            }
         </style>
     `);
     printWindow.document.write('</head><body>');
@@ -376,11 +456,24 @@ function printNota() {
         <div class="border-t text-xs" style="padding-top: 8px; margin-bottom: 12px;">
             <div class="flex">
                 <span>Subtotal</span>
-                <span>Rp ${total}</span>
+                <span>Rp ${subtotal.toLocaleString('id-ID')}</span>
             </div>
-            <div class="flex font-bold text-sm" style="margin-top: 4px; font-size: 12px;">
+            
+            ${hasDiskon ? `
+            <div class="discount-box">
+                <div class="discount-label text-xs">
+                    <span>✓ Diskon Referral 10%</span>
+                </div>
+                <div class="flex" style="color: #dc2626;">
+                    <span>Potongan</span>
+                    <span class="font-bold">-Rp ${diskon.toLocaleString('id-ID')}</span>
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="flex font-bold text-sm" style="margin-top: 6px; font-size: 12px;">
                 <span>TOTAL</span>
-                <span>Rp ${total}</span>
+                <span>Rp ${total.toLocaleString('id-ID')}</span>
             </div>
             <div class="flex">
                 <span>Pembayaran</span>
@@ -390,6 +483,7 @@ function printNota() {
 
         <div class="text-center text-xs border-t" style="padding-top: 12px;">
             <div class="font-bold" style="margin-bottom: 8px;">Terima kasih atas kunjungan Anda!</div>
+            ${hasDiskon ? '<div style="color: #059669; font-weight: bold; margin-bottom: 8px;">Anda hemat Rp ' + diskon.toLocaleString('id-ID') + '!</div>' : ''}
             <div>Barang yang sudah dibeli</div>
             <div>tidak dapat ditukar/dikembalikan</div>
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ccc;">

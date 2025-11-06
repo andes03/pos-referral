@@ -22,7 +22,13 @@
             <div class="flex items-center justify-center h-24 bg-gradient-to-r from-green-900 to-emerald-900 border-b border-green-700/50">
                 <div class="text-center">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 backdrop-blur-sm">
-                        <x-heroicon-o-shopping-bag class="w-6 h-6 text-white" />
+                        <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                            <line x1="6" y1="1" x2="6" y2="4"></line>
+                            <line x1="10" y1="1" x2="10" y2="4"></line>
+                            <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
                     </div>
                     <h1 class="text-white text-lg font-bold tracking-wide">Sebelas Coffee</h1>
                 </div>

@@ -116,7 +116,27 @@
                         <!-- Produk akan dimuat di sini -->
                     </div>
                     <div class="border-t border-gray-200 pt-3 mt-3">
-                        <p class="text-right text-lg font-semibold text-gray-900">Total: Rp <span id="viewTotal"></span></p>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Subtotal:</span>
+                                <span class="text-gray-900" id="viewSubtotal"></span>
+                            </div>
+                            <div id="viewDiscountRow" class="hidden">
+                                <div class="flex justify-between items-center py-2 px-3 bg-green-50 rounded-lg">
+                                    <span class="text-green-700 font-medium flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Diskon Referral (10%)
+                                    </span>
+                                    <span class="text-red-600 font-bold" id="viewDiskon"></span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                <span class="text-lg font-semibold text-gray-900">Total:</span>
+                                <span class="text-lg font-bold text-green-600">Rp <span id="viewTotal"></span></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -145,6 +165,7 @@ let currentPage = 1;
 let deleteId = null;
 let searchTimeout;
 let isSearching = false;
+let currentTransaksiData = null; // Store current transaction data for printing
 
 // Data awal dari server
 const initialData = @json($initialData ?? []);
@@ -600,6 +621,7 @@ function viewTransaksi(id) {
         }
 
         const transaksi = data.data;
+        currentTransaksiData = transaksi; // Store for printing
         
         // Generate kode transaksi
         const date = new Date(transaksi.tanggal_transaksi);
@@ -636,8 +658,10 @@ function viewTransaksi(id) {
         const produkList = document.getElementById('produkList');
         produkList.innerHTML = '';
 
+        let subtotal = 0;
         if (transaksi.detail_transaksi && transaksi.detail_transaksi.length > 0) {
             transaksi.detail_transaksi.forEach(detail => {
+                subtotal += parseFloat(detail.subtotal);
                 const produkItem = `
                     <div class="flex items-center p-3 bg-gray-50 rounded-lg">
                         <div class="flex-shrink-0 h-12 w-12 rounded-lg overflow-hidden ${detail.produk?.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold text-lg'}">
@@ -658,7 +682,23 @@ function viewTransaksi(id) {
             produkList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Tidak ada detail produk</p>';
         }
 
-        document.getElementById('viewTotal').textContent = parseFloat(transaksi.total).toLocaleString('id-ID');
+        // Calculate discount
+        const total = parseFloat(transaksi.total);
+        const diskon = subtotal - total;
+        const hasDiskon = diskon > 0;
+
+        // Display subtotal, discount, and total
+        document.getElementById('viewSubtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+        
+        const discountRow = document.getElementById('viewDiscountRow');
+        if (hasDiskon) {
+            document.getElementById('viewDiskon').textContent = '-Rp ' + diskon.toLocaleString('id-ID');
+            discountRow.classList.remove('hidden');
+        } else {
+            discountRow.classList.add('hidden');
+        }
+
+        document.getElementById('viewTotal').textContent = total.toLocaleString('id-ID');
 
         document.getElementById('viewModal').classList.remove('hidden');
     })
@@ -670,42 +710,67 @@ function viewTransaksi(id) {
 
 function closeViewModal() {
     document.getElementById('viewModal').classList.add('hidden');
+    currentTransaksiData = null;
 }
 
 function printNotaFromModal() {
-    const kode = document.getElementById('viewKode').textContent;
-    const tanggal = document.getElementById('viewTanggal').textContent;
-    const metode = document.getElementById('viewMetode').textContent;
-    const pegawai = document.getElementById('viewPegawai').textContent;
-    const pelanggan = document.getElementById('viewPelanggan').textContent;
-    const total = document.getElementById('viewTotal').textContent;
+    if (!currentTransaksiData) {
+        showAlert('Data transaksi tidak tersedia', 'error');
+        return;
+    }
 
-    // Get product list
-    const produkItems = document.getElementById('produkList').querySelectorAll('.flex.items-center');
+    const transaksi = currentTransaksiData;
+    
+    // Generate kode transaksi
+    const date = new Date(transaksi.tanggal_transaksi);
+    const kode = `${date.getDate().toString().padStart(2, '0')}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getFullYear().toString().slice(-2)}-TRA${transaksi.id_transaksi.toString().padStart(3, '0')}`;
+    
+    const tanggal = new Date(transaksi.tanggal_transaksi).toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    const metodeMap = {
+        'cash': 'Cash',
+        'qris': 'QRIS',
+        'transfer': 'Transfer Bank'
+    };
+    const metode = metodeMap[transaksi.metode_pembayaran] || transaksi.metode_pembayaran;
+    const pegawai = transaksi.pegawai?.nama || '-';
+    const pelanggan = transaksi.pelanggan?.nama || '-';
+
+    // Calculate subtotal and discount
+    let subtotal = 0;
     let produkHTML = '';
 
-    produkItems.forEach(item => {
-        const nama = item.querySelector('.text-sm.font-medium')?.textContent || '';
-        const detail = item.querySelector('.text-xs')?.textContent || '';
+    if (transaksi.detail_transaksi && transaksi.detail_transaksi.length > 0) {
+        transaksi.detail_transaksi.forEach(detail => {
+            subtotal += parseFloat(detail.subtotal);
+            const nama = detail.produk?.nama || 'Produk tidak ditemukan';
+            const qty = detail.jumlah;
+            const harga = (detail.subtotal / detail.jumlah).toLocaleString('id-ID');
+            const subtotalItem = parseFloat(detail.subtotal).toLocaleString('id-ID');
 
-        const match = detail.match(/(\d+) x Rp ([\d,.]+) = .*Rp ([\d,.]+)/);
-        if (match) {
-            const qty = match[1];
-            const harga = match[2];
-            const subtotal = match[3];
             produkHTML += `
                 <tr>
                     <td colspan="3" style="padding: 4px 0;">
                         <div style="font-weight: bold;">${nama}</div>
                         <div style="color: #666; display: flex; justify-content: space-between; font-size: 10px;">
                             <span>${qty} x Rp ${harga}</span>
-                            <span style="font-weight: bold;">Rp ${subtotal}</span>
+                            <span style="font-weight: bold;">Rp ${subtotalItem}</span>
                         </div>
                     </td>
                 </tr>
             `;
-        }
-    });
+        });
+    }
+
+    const total = parseFloat(transaksi.total);
+    const diskon = subtotal - total;
+    const hasDiskon = diskon > 0;
 
     const printWindow = window.open('', '', 'height=600,width=400');
     printWindow.document.write('<html><head><title>Nota Transaksi</title>');
@@ -744,6 +809,20 @@ function printNotaFromModal() {
             .text-sm { font-size: 11px; }
             .text-xl { font-size: 16px; }
             h1 { font-size: 18px; margin-bottom: 4px; }
+            .discount-box {
+                background: #f0fdf4;
+                padding: 6px;
+                margin: 6px -6px;
+                border-radius: 4px;
+            }
+            .discount-label {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2px;
+                color: #166534;
+                font-weight: bold;
+            }
         </style>
     `);
     printWindow.document.write('</head><body>');
@@ -783,11 +862,24 @@ function printNotaFromModal() {
         <div class="border-t text-xs" style="padding-top: 8px; margin-bottom: 12px;">
             <div class="flex">
                 <span>Subtotal</span>
-                <span>Rp ${total}</span>
+                <span>Rp ${subtotal.toLocaleString('id-ID')}</span>
             </div>
-            <div class="flex font-bold text-sm" style="margin-top: 4px; font-size: 12px;">
+            
+            ${hasDiskon ? `
+            <div class="discount-box">
+                <div class="discount-label text-xs">
+                    <span>✓ Diskon Referral 10%</span>
+                </div>
+                <div class="flex" style="color: #dc2626;">
+                    <span>Potongan</span>
+                    <span class="font-bold">-Rp ${diskon.toLocaleString('id-ID')}</span>
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="flex font-bold text-sm" style="margin-top: 6px; font-size: 12px;">
                 <span>TOTAL</span>
-                <span>Rp ${total}</span>
+                <span>Rp ${total.toLocaleString('id-ID')}</span>
             </div>
             <div class="flex">
                 <span>Pembayaran</span>
@@ -797,6 +889,7 @@ function printNotaFromModal() {
 
         <div class="text-center text-xs border-t" style="padding-top: 12px;">
             <div class="font-bold" style="margin-bottom: 8px;">Terima kasih atas kunjungan Anda!</div>
+            ${hasDiskon ? '<div style="color: #059669; font-weight: bold; margin-bottom: 8px;">Anda hemat Rp ' + diskon.toLocaleString('id-ID') + '!</div>' : ''}
             <div>Barang yang sudah dibeli</div>
             <div>tidak dapat ditukar/dikembalikan</div>
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ccc;">
@@ -812,35 +905,6 @@ function printNotaFromModal() {
         printWindow.print();
         printWindow.close();
     }, 250);
-}
-
-function convertProdukListToTable(html) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    
-    const produkItems = tempDiv.querySelectorAll('.flex.items-center');
-    let tableRows = '';
-    
-    produkItems.forEach(item => {
-        const nama = item.querySelector('.text-sm.font-medium')?.textContent || '';
-        const detail = item.querySelector('.text-xs')?.textContent || '';
-        
-        // Extract jumlah and subtotal from detail text
-        const match = detail.match(/(\d+) x Rp ([\d,.]+) = Rp ([\d,.]+)/);
-        if (match) {
-            const qty = match[1];
-            const subtotal = match[3];
-            tableRows += `
-                <tr>
-                    <td>${nama}</td>
-                    <td class="text-center">${qty}</td>
-                    <td class="text-right">Rp ${subtotal}</td>
-                </tr>
-            `;
-        }
-    });
-    
-    return tableRows;
 }
 
 function showAlert(message, type) {
