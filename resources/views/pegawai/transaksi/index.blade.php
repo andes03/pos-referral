@@ -48,33 +48,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="relative w-full max-w-sm bg-white rounded-lg shadow-xl p-5">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-3">
-                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Konfirmasi Hapus</h3>
-                <p class="text-xs text-gray-600 mb-4">Apakah Anda yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan.</p>
 
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeDeleteModal()"
-                            class="flex-1 px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="button" id="confirmDeleteBtn" onclick="confirmDelete()"
-                            class="flex-1 px-4 py-1.5 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700">
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- View Modal -->
 <div id="viewModal" class="fixed inset-0 overflow-y-auto h-full w-full hidden z-50" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -162,7 +136,6 @@
 
 <script>
 let currentPage = 1;
-let deleteId = null;
 let searchTimeout;
 let isSearching = false;
 let currentTransaksiData = null; // Store current transaction data for printing
@@ -487,11 +460,6 @@ function renderTable(transaksi) {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                         </button>
-                        <button onclick="deleteTransaksi(${item.id_transaksi})" class="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-all" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
                     </div>
                 </td>
             </tr>
@@ -566,47 +534,7 @@ function searchData() {
     loadTransaksi(1);
 }
 
-function deleteTransaksi(id) {
-    deleteId = id;
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
 
-function confirmDelete() {
-    const confirmBtn = document.getElementById('confirmDeleteBtn');
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = 'Menghapus...';
-
-    fetch(`{{ route('pegawai.transaksi.index') }}/${deleteId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeDeleteModal();
-            loadTransaksi(currentPage);
-            showAlert(data.message || 'Transaksi berhasil dihapus', 'success');
-        } else {
-            showAlert(data.message || 'Terjadi kesalahan', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('Terjadi kesalahan saat menghapus transaksi', 'error');
-    })
-    .finally(() => {
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = 'Hapus';
-    });
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    deleteId = null;
-}
 
 function viewTransaksi(id) {
     fetch(`{{ route('pegawai.transaksi.index') }}/${id}`, {

@@ -12,6 +12,12 @@
         </a>
     </div>
 
+    @php
+        $subtotal = $transaction->detailTransaksi->sum('subtotal');
+        $diskon = $subtotal - $transaction->total;
+        $hasDiskon = $diskon > 0;
+    @endphp
+
     <!-- Transaction Details -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -62,10 +68,10 @@
                             <div class="text-sm text-gray-500">{{ $detail->produk->kategori->nama_kategori }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $detail->quantity }}</div>
+                            <div class="text-sm text-gray-900">{{ $detail->jumlah }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">Rp {{ number_format($detail->harga, 0, ',', '.') }}</div>
+                            <div class="text-sm text-gray-900">Rp {{ number_format($detail->subtotal / $detail->jumlah, 0, ',', '.') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</div>
@@ -75,10 +81,25 @@
                 </tbody>
                 <tfoot class="bg-gray-50">
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 text-right">Total</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
+                        <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 text-right">Subtotal</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                     </tr>
-                </tfoot>
+                    @if($hasDiskon)
+                    <tr class="bg-green-50">
+                        <td colspan="4" class="px-6 py-4 text-sm font-medium text-green-700 text-right">
+                            <span class="flex items-center justify-end gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Diskon Referral (10%)
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-600">-Rp {{ number_format($diskon, 0, ',', '.') }}</td>
+                    </tr>
+                    @endif
+                    <tr class="bg-gray-100">
+                        <td colspan="4" class="px-6 py-4 text-sm font-bold text-gray-900 text-right">Total Bayar</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
             </table>
         </div>
     </div>
