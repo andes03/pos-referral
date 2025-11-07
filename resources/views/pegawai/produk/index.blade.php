@@ -26,20 +26,9 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="sticky top-0 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100 z-10">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Produk</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kategori</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Harga</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stok</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="produkTableBody">
-                </tbody>
-            </table>
+        <div id="produkGridContainer" class="p-6">
+            <div id="produkGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            </div>
         </div>
         <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
         </div>
@@ -236,23 +225,23 @@ const initialPagination = @json($pagination ?? null);
 document.addEventListener('DOMContentLoaded', function() {
     // Render data awal langsung tanpa AJAX call
     if (initialData.length > 0) {
-        renderTable(initialData);
+        renderGrid(initialData);
         if (initialPagination) {
             renderPagination(initialPagination);
             currentPage = initialPagination.current_page;
         }
     } else {
-        renderTable([]);
+        renderGrid([]);
     }
 
     // Search on input change with debounce (600ms for better UX)
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
-        
+
         // Show searching indicator
         showSearchingIndicator();
-        
+
         searchTimeout = setTimeout(function() {
             searchData();
         }, 600);
@@ -267,148 +256,97 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function loadProduk(page = 1) {
     if (isSearching) return; // Prevent multiple simultaneous requests
-    
+
     isSearching = true;
     currentPage = page;
     const search = document.getElementById('searchInput').value;
 
-    const tbody = document.getElementById('produkTableBody');
-    tbody.innerHTML = `
-        <tr class="border-b border-gray-100">
-            <td class="px-6 py-3">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div class="ml-3">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
-                    </div>
+    const grid = document.getElementById('produkGrid');
+    grid.innerHTML = `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 animate-pulse">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 h-16 w-16 rounded-lg bg-gray-200"></div>
+                <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
                 </div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="flex items-center justify-end gap-2">
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div class="mt-4 space-y-2">
+                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="h-4 bg-gray-200 rounded w-16"></div>
+                <div class="flex space-x-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
                 </div>
-            </td>
-        </tr>
-        <tr class="border-b border-gray-100">
-            <td class="px-6 py-3">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div class="ml-3">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-20 mt-1"></div>
-                    </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 animate-pulse">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 h-16 w-16 rounded-lg bg-gray-200"></div>
+                <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
                 </div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="flex items-center justify-end gap-2">
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div class="mt-4 space-y-2">
+                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="h-4 bg-gray-200 rounded w-16"></div>
+                <div class="flex space-x-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
                 </div>
-            </td>
-        </tr>
-        <tr class="border-b border-gray-100">
-            <td class="px-6 py-3">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div class="ml-3">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-36"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-28 mt-1"></div>
-                    </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 animate-pulse">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 h-16 w-16 rounded-lg bg-gray-200"></div>
+                <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
                 </div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="flex items-center justify-end gap-2">
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div class="mt-4 space-y-2">
+                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="h-4 bg-gray-200 rounded w-16"></div>
+                <div class="flex space-x-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
                 </div>
-            </td>
-        </tr>
-        <tr class="border-b border-gray-100">
-            <td class="px-6 py-3">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div class="ml-3">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-16 mt-1"></div>
-                    </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 animate-pulse">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0 h-16 w-16 rounded-lg bg-gray-200"></div>
+                <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
                 </div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="flex items-center justify-end gap-2">
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div class="mt-4 space-y-2">
+                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="h-4 bg-gray-200 rounded w-16"></div>
+                <div class="flex space-x-2">
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-8 bg-gray-200 rounded"></div>
                 </div>
-            </td>
-        </tr>
-        <tr class="border-b border-gray-100">
-            <td class="px-6 py-3">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-                    <div class="ml-3">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-                        <div class="h-3 bg-gray-200 rounded animate-pulse w-24 mt-1"></div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-            </td>
-            <td class="px-6 py-3">
-                <div class="flex items-center justify-end gap-2">
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-            </td>
-        </tr>
+            </div>
+        </div>
     `;
 
     fetch(`{{ route('pegawai.produk.index') }}?page=${page}&search=${encodeURIComponent(search)}`, {
@@ -419,88 +357,80 @@ function loadProduk(page = 1) {
     })
     .then(response => response.json())
     .then(data => {
-        renderTable(data.data);
+        renderGrid(data.data);
         renderPagination(data.pagination);
         isSearching = false;
         hideSearchingIndicator();
     })
     .catch(error => {
         console.error('Error:', error);
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-6 py-8 text-center">
-                    <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
-                </td>
-            </tr>
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <p class="text-red-500">Gagal memuat data. Silakan refresh halaman.</p>
+            </div>
         `;
         isSearching = false;
         hideSearchingIndicator();
     });
 }
 
-function renderTable(produk) {
-    const tbody = document.getElementById('produkTableBody');
-    tbody.innerHTML = '';
+function renderGrid(produk) {
+    const grid = document.getElementById('produkGrid');
+    grid.innerHTML = '';
 
     if (produk.length === 0) {
         if (document.getElementById('searchInput').value.trim() !== '') {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center">
-                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                            <p class="text-gray-500 font-medium">Tidak ada hasil untuk "${document.getElementById('searchInput').value}"</p>
-                            <p class="text-gray-400 text-sm mt-1">Coba gunakan kata kunci lain</p>
-                        </div>
-                    </td>
-                </tr>
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <p class="text-gray-500 font-medium">Tidak ada hasil untuk "${document.getElementById('searchInput').value}"</p>
+                        <p class="text-gray-400 text-sm mt-1">Coba gunakan kata kunci lain</p>
+                    </div>
+                </div>
             `;
         } else {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center">
-                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                            <p class="text-gray-500 font-medium">Tidak ada data produk</p>
-                            <p class="text-gray-400 text-sm mt-1">Mulai tambahkan produk baru</p>
-                        </div>
-                    </td>
-                </tr>
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <p class="text-gray-500 font-medium">Tidak ada data produk</p>
+                        <p class="text-gray-400 text-sm mt-1">Mulai tambahkan produk baru</p>
+                    </div>
+                </div>
             `;
         }
         return;
     }
 
     produk.forEach(item => {
-        const row = `
-            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-3">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden ${item.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-semibold'}">
-                            ${item.image
-                                ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover">`
-                                : item.nama.charAt(0).toUpperCase()
-                            }
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">${item.nama}</p>
-                            <p class="text-xs text-gray-500">${item.deskripsi ? (item.deskripsi.length > 30 ? item.deskripsi.substring(0, 30) + '...' : item.deskripsi) : '-'}</p>
-                        </div>
+        const card = `
+            <div class="group bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-200">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0 h-16 w-16 rounded-lg overflow-hidden ${item.image ? '' : 'bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-xl'}">
+                        ${item.image
+                            ? `<img src="/storage/${item.image}" alt="${item.nama}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'h-16 w-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-xl\\'>${item.nama.charAt(0).toUpperCase()}</div>'">`
+                            : item.nama.charAt(0).toUpperCase()
+                        }
                     </div>
-                </td>
-                <td class="px-6 py-3 text-sm text-gray-600">${item.kategori ? item.kategori.nama_kategori : '-'}</td>
-                <td class="px-6 py-3 text-sm text-gray-600">Rp ${parseInt(item.harga).toLocaleString('id-ID')}</td>
-                <td class="px-6 py-3">
-                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${item.stok > 10 ? 'bg-green-100 text-green-700' : item.stok > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
-                        ${item.stok}
-                    </span>
-                </td>
-                <td class="px-6 py-3">
-                    <div class="flex items-center justify-end gap-2">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-gray-900 truncate">${item.nama}</h3>
+                        <p class="text-xs text-gray-500 mt-1">${item.deskripsi ? (item.deskripsi.length > 40 ? item.deskripsi.substring(0, 40) + '...' : item.deskripsi) : '-'}</p>
+                        <p class="text-xs text-gray-400 mt-1">${item.kategori ? item.kategori.nama_kategori : '-'}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-gray-900">Rp ${parseInt(item.harga).toLocaleString('id-ID')}</span>
+                        <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full w-fit mt-1 ${item.stok > 10 ? 'bg-green-100 text-green-700' : item.stok > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
+                            Stok: ${item.stok}
+                        </span>
+                    </div>
+                    <div class="flex space-x-1">
                         <button onclick="viewProduk(${item.id_produk})" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-all" title="Lihat Detail">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -518,10 +448,10 @@ function renderTable(produk) {
                             </svg>
                         </button>
                     </div>
-                </td>
-            </tr>
+                </div>
+            </div>
         `;
-        tbody.innerHTML += row;
+        grid.innerHTML += card;
     });
 }
 

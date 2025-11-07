@@ -9,6 +9,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\LaporanController;
 
 
 // Landing page
@@ -41,6 +42,8 @@ Route::middleware(['auth.pegawai'])->prefix('pegawai')->name('pegawai.')->group(
         ->name('transaksi.verifyReferral');
     
     Route::resource('transaksi', TransaksiController::class);
+    Route::resource('laporan', LaporanController::class);
+    Route::get('laporan-export-pdf', [LaporanController::class, 'exportPDF'])->name('laporan.exportPDF');
 });
 
 // Pelanggan routes (protected by pelanggan middleware)

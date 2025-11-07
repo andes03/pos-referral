@@ -45,12 +45,7 @@
             </p>
         </div>
 
-        <!-- Back to Home Icon -->
-        <div class="flex justify-start mb-6">
-            <a href="/" class="text-green-100 hover:text-white transition-colors duration-300 group">
-                <x-heroicon-o-arrow-left class="w-6 h-6 group-hover:-translate-x-1 transition-transform duration-300" />
-            </a>
-        </div>
+
 
         <!-- Register Form -->
         <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">

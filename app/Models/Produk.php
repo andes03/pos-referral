@@ -31,6 +31,8 @@ class Produk extends Model
         return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
     }
 
+    protected $with = ['kategori'];
+
     public function detailTransaksi()
     {
         return $this->hasMany(DetailTransaksi::class, 'id_produk', 'id_produk');

@@ -13,6 +13,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Custom Styles Stack -->
+    @stack('styles')
 </head>
 <body class="bg-gray-100" x-data="{ showProfileInfo: false }" @click="showProfileInfo = false">
     <div class="min-h-screen flex flex-col">
@@ -82,6 +85,14 @@
                     <x-heroicon-o-document-text class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
                     <span class="font-medium">Transaksi</span>
                     @if(request()->routeIs('pegawai.transaksi.*'))
+                        <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    @endif
+                </a>
+
+                <a href="{{ route('pegawai.laporan.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.laporan.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
+                    <x-heroicon-o-chart-bar class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <span class="font-medium">Laporan</span>
+                    @if(request()->routeIs('pegawai.laporan.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
@@ -189,5 +200,8 @@
 
     <!-- Modal Container -->
     <div id="modal-container"></div>
+    
+    <!-- IMPORTANT: Stack for custom scripts (e.g., Chart.js) -->
+    @stack('scripts')
 </body>
 </html>

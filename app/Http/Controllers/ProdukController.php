@@ -14,8 +14,7 @@ class ProdukController extends Controller
         $search = $request->get('search');
         $kategori = $request->get('kategori');
         
-        $produk = Produk::with('kategori')
-            ->when($kategori, function ($query) use ($kategori) {
+        $produk = Produk::when($kategori, function ($query) use ($kategori) {
                 $query->where('id_kategori', $kategori);
             })
             ->when($search, function ($query) use ($search) {
