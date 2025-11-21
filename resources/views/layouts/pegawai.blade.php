@@ -20,7 +20,7 @@
 <body class="bg-gray-100" x-data="{ showProfileInfo: false }" @click="showProfileInfo = false">
     <div class="min-h-screen flex flex-col">
         <!-- Sidebar -->
-        <div class="fixed left-0 top-0 h-screen w-64 bg-gradient-to-br from-green-800 via-green-700 to-emerald-900 shadow-2xl">
+        <div class="fixed left-0 top-0 h-screen w-64 bg-gradient-to-br from-green-800 via-green-700 to-emerald-900 shadow-2xl overflow-y-auto">
             <!-- Header -->
             <div class="flex items-center justify-center h-24 bg-gradient-to-r from-green-900 to-emerald-900 border-b border-green-700/50">
                 <div class="text-center">
@@ -38,18 +38,24 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-8 px-4 space-y-2">
+            <nav class="mt-8 px-4 space-y-2 pb-8">
+                <!-- Dashboard -->
                 <a href="{{ route('pegawai.dashboard') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.dashboard') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-home class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
                     <span class="font-medium">Dashboard</span>
                     @if(request()->routeIs('pegawai.dashboard'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
 
+                <!-- Pegawai (Admin Only) -->
                 @if(Auth::guard('pegawai')->user()->role === 'admin')
                 <a href="{{ route('pegawai.pegawai.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.pegawai.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-users class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
                     <span class="font-medium">Pegawai</span>
                     @if(request()->routeIs('pegawai.pegawai.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -57,48 +63,72 @@
                 </a>
                 @endif
 
+                <!-- Pelanggan -->
                 <a href="{{ route('pegawai.pelanggan.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.pelanggan.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-user-group class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
                     <span class="font-medium">Pelanggan</span>
                     @if(request()->routeIs('pegawai.pelanggan.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
 
+                <!-- Kategori -->
                 <a href="{{ route('pegawai.kategori.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.kategori.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-folder class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
                     <span class="font-medium">Kategori</span>
                     @if(request()->routeIs('pegawai.kategori.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
 
+                <!-- Produk -->
                 <a href="{{ route('pegawai.produk.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.produk.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-cube class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
                     <span class="font-medium">Produk</span>
                     @if(request()->routeIs('pegawai.produk.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
 
+                <!-- Transaksi -->
                 <a href="{{ route('pegawai.transaksi.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.transaksi.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-document-text class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
                     <span class="font-medium">Transaksi</span>
                     @if(request()->routeIs('pegawai.transaksi.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
 
+                <!-- Import CSV -->
+                <a href="{{ route('pegawai.import.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.import.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <span class="font-medium">Import CSV</span>
+                    @if(request()->routeIs('pegawai.import.*'))
+                        <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    @endif
+                </a>
+
+                <!-- Laporan -->
                 <a href="{{ route('pegawai.laporan.index') }}" class="group flex items-center px-4 py-3 text-green-100 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg {{ request()->routeIs('pegawai.laporan.*') ? 'bg-white/20 text-white shadow-lg scale-105' : '' }}">
-                    <x-heroicon-o-chart-bar class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" />
+                    <svg class="w-5 h-5 mr-4 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
                     <span class="font-medium">Laporan</span>
                     @if(request()->routeIs('pegawai.laporan.*'))
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     @endif
                 </a>
             </nav>
-
-
         </div>
 
         <!-- Main Content -->
@@ -154,7 +184,6 @@
                                             <span class="text-xs text-gray-500">Role</span>
                                             <span class="text-sm text-gray-900">{{ ucfirst(Auth::guard('pegawai')->user()->role) }}</span>
                                         </div>
-                                       
                                     </div>
 
                                     <!-- Actions -->
@@ -172,7 +201,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </header>

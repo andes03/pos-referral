@@ -10,7 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\LaporanController;
-
+use App\Http\Controllers\ImportController;
 
 // Landing page
 Route::get('/', [App\Http\Controllers\LandingController::class, 'index']);
@@ -42,6 +42,13 @@ Route::middleware(['auth.pegawai'])->prefix('pegawai')->name('pegawai.')->group(
         ->name('transaksi.verifyReferral');
     
     Route::resource('transaksi', TransaksiController::class);
+    
+    // Import CSV routes
+    Route::get('import', [ImportController::class, 'index'])->name('import.index');
+    Route::get('import/download-template', [ImportController::class, 'downloadTemplate'])->name('import.downloadTemplate');
+    Route::post('import/upload', [ImportController::class, 'import'])->name('import.import');
+    
+    // Laporan routes
     Route::resource('laporan', LaporanController::class);
     Route::get('laporan-export-pdf', [LaporanController::class, 'exportPDF'])->name('laporan.exportPDF');
 });
